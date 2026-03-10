@@ -1,0 +1,47 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: swiftcover_db
+    environment:
+      POSTGRES_DB: swiftcover
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: swiftcover123
+    ports: ["5432:5432"]
+    volumes: [postgres_data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d swiftcover"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: swiftcover_api
+    ports: ["8000:8000"]
+    environment:
+      DATABASE_URL: postgresql://postgres:swiftcover123@postgres:5432/swiftcover
+      ENVIRONMENT: development
+      OPENWEATHER_API_KEY: mock
+      CORS_ORIGINS: http://localhost:5173
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes: ["./backend:/app"]
+    restart: on-failure
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: swiftcover_ui
+    ports: ["5173:5173"]
+    depends_on: [backend]
+    volumes: ["./frontend/src:/app/src"]
+    environment:
+      VITE_API_BASE_URL: http://localhost:8000
+
+volumes:
+  postgres_data:
