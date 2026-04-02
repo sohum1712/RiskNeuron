@@ -1,283 +1,533 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, Shield, TrendingUp, CloudRain, Factory, Thermometer, Navigation, Store, AlertCircle } from 'lucide-react';
-import { Button } from '../components/ui/Button';
-
-const payoutExamples = [
-  { name: 'Rahul Kumar', disruption: 'Heavy Rain', amount: 420, upi: 'UPI20240115143022' },
-  { name: 'Priya Sharma', disruption: 'Flood', amount: 385, upi: 'UPI20240115143145' },
-  { name: 'Mohammed Ali', disruption: 'Severe Pollution', amount: 310, upi: 'UPI20240115143308' },
-  { name: 'Anita Devi', disruption: 'Extreme Heat', amount: 275, upi: 'UPI20240115143421' }
-];
-
-export const Landing: React.FC = () => {
-  const navigate = useNavigate();
-  const [currentPayoutIndex, setCurrentPayoutIndex] = useState(0);
-
+import { motion } from 'framer-motion';
+import landingBgUrl from '../assets/images/Landing page.jpeg';
+import howItWorksBgUrl from '../assets/images/Bg.jpeg';
+function useFonts() {
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentPayoutIndex((prev) => (prev + 1) % payoutExamples.length);
-    }, 4000);
-    return () => clearInterval(interval);
+    if (document.getElementById('sw-fonts-v2')) return;
+    const link = document.createElement('link');
+    link.id = 'sw-fonts-v2';
+    link.rel = 'stylesheet';
+    link.href =
+      'https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800;900&family=DM+Sans:wght@300;400;500&family=Space+Grotesk:wght@300;400;500;600&display=swap';
+    document.head.appendChild(link);
+  }, []);
+}
+
+/* ─── Colour tokens ─── */
+const C = {
+  bg: '#0C1117',
+  surface: '#161C27',
+  surface2: '#1E2537',
+  border: 'rgba(255,255,255,0.07)',
+  orange: '#F97316',
+  orangeHover: '#EA6C0E',
+  green: '#22C55E',
+  white: '#FFFFFF',
+  muted: 'rgba(255,255,255,0.55)',
+  mutedLight: 'rgba(255,255,255,0.35)',
+};
+
+const font = {
+  display: "'Barlow', sans-serif",
+  body: "'DM Sans', sans-serif",
+  label: "'Space Grotesk', sans-serif",
+};
+
+/* ─── SVG Icons ─── */
+const ShieldIcon = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={C.orange} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+  </svg>
+);
+const CheckIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.green} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="20 6 9 17 4 12" />
+  </svg>
+);
+const ArrowRightIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+  </svg>
+);
+
+/* ─── Navbar ─── */
+interface NavbarProps {
+  onJoin: () => void;
+  onAdmin: () => void;
+  scrollTo: (section: string) => void;
+}
+
+function Navbar({ onJoin, onAdmin, scrollTo }: NavbarProps) {
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const fn = () => setScrolled(window.scrollY > 24);
+    window.addEventListener('scroll', fn);
+    return () => window.removeEventListener('scroll', fn);
   }, []);
 
-  const currentPayout = payoutExamples[currentPayoutIndex];
+  const navLinks = [
+    { id: 'SwiftCover', label: 'SwiftCover' },
+    { id: 'HowItWorks', label: 'How It Works' },
+    { id: 'CoveragePlans', label: 'Coverage Plans' },
+    { id: 'FAQ', label: 'FAQ' }
+  ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
-      {/* Navbar */}
-      <nav className="border-b border-slate-700 bg-slate-900/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Zap className="w-6 h-6 text-cyan-400" />
-            <span className="text-xl font-black text-slate-100">
-              Swift<span className="text-cyan-400">Cover</span>
+    <nav style={{
+      position: 'fixed', top: 20, left: 0, right: 0, zIndex: 100,
+      display: 'flex', justifyContent: 'center', pointerEvents: 'none'
+    }}>
+      <div style={{
+        backdropFilter: scrolled ? 'blur(40px)' : 'none',
+        border: scrolled ? `1px solid rgba(255, 255, 255, 0.12)` : '1px solid transparent',
+        background: scrolled ? 'rgba(12, 17, 23, 0.4)' : 'transparent',
+        borderRadius: 40,
+        padding: '8px 12px',
+        display: 'flex',
+        alignItems: 'center',
+        pointerEvents: 'auto',
+        gap: 24,
+        transition: 'all 0.3s ease-in-out'
+      }}>
+        {/* Left: Admin & Logo */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, paddingLeft: 8 }}>
+          <button onClick={onAdmin}
+            style={{ fontFamily: font.label, fontSize: 13, color: C.white, background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: 20, padding: '8px 16px', cursor: 'pointer' }}
+            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.25)')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.15)')}
+          >
+            Admin
+          </button>
+          <div onClick={() => scrollTo('SwiftCover')} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+            <ShieldIcon />
+            <span style={{ fontFamily: font.display, fontWeight: 800, fontSize: 18, color: C.white, letterSpacing: '-0.01em' }}>SwiftCover</span>
+          </div>
+        </div>
+
+        {/* Center: Pills */}
+        <div style={{ display: 'flex', gap: 6 }}>
+          {navLinks.map((l) => (
+            <span key={l.id}
+              onClick={() => scrollTo(l.id)}
+              style={{
+                fontFamily: font.label, fontSize: 12, fontWeight: 500,
+                color: C.white,
+                background: 'rgba(255,255,255,0.08)',
+                borderRadius: 20,
+                padding: '8px 14px',
+                cursor: 'pointer',
+                letterSpacing: '0.02em',
+                transition: 'all 0.2s',
+                whiteSpace: 'nowrap'
+              }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.2)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.08)')}
+            >
+              {l.label}
             </span>
-          </div>
-          <div className="flex items-center gap-4">
-            <Button variant="primary" onClick={() => navigate('/onboarding')}>
-              Get Protected
-            </Button>
-            <Button variant="ghost" onClick={() => navigate('/admin')}>
-              Admin Console
-            </Button>
-          </div>
+          ))}
+          <button onClick={onJoin}
+            style={{
+              fontFamily: font.label, fontWeight: 600, fontSize: 12, letterSpacing: '0.02em',
+              background: C.orange, color: C.white, border: 'none', borderRadius: 20, padding: '8px 18px', cursor: 'pointer',
+              marginLeft: 4, transition: 'all 0.2s', whiteSpace: 'nowrap'
+            }}
+            onMouseEnter={e => (e.currentTarget.style.background = C.orangeHover)}
+            onMouseLeave={e => (e.currentTarget.style.background = C.orange)}
+          >Protect Your Earnings</button>
         </div>
-      </nav>
+      </div>
+    </nav>
+  );
+}
 
-      {/* Hero Section */}
-      <section className="min-h-screen flex items-center">
-        <div className="max-w-7xl mx-auto px-6 py-20">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Left Column */}
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-            >
-              <div className="inline-flex items-center gap-2 bg-cyan-500/10 border border-cyan-500/20 rounded-full px-4 py-2 mb-6">
-                <span className="text-2xl">🏆</span>
-                <span className="text-sm text-cyan-400 font-medium">
-                  DEVTrails 2026 · Q-Commerce Income Insurance
-                </span>
-              </div>
+/* ─── Floating overlay card ─── */
+function FloatCard({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
+  return (
+    <div style={{
+      position: 'absolute',
+      background: C.surface,
+      border: `1px solid ${C.border}`,
+      borderRadius: 10,
+      padding: '10px 14px',
+      backdropFilter: 'blur(8px)',
+      ...style,
+    }}>
+      {children}
+    </div>
+  );
+}
 
-              <h1 className="text-5xl lg:text-6xl font-black leading-tight mb-4">
-                When Rain Stops Orders,
-              </h1>
-              <h1 className="text-5xl lg:text-6xl font-black leading-tight text-cyan-400 mb-6">
-                We Don't Stop Paying.
-              </h1>
+/* ─── Mini line chart ─── */
+function MiniChart() {
+  const expected = [180, 200, 220, 240, 210, 260, 280, 270, 300, 290, 320, 340, 310, 350];
+  const actual   = [170, 190, 140,  80,  60, 100, 220, 260, 280, 275, 310, 330, 300, 340];
+  const w = 160, h = 60;
+  const minV = 60, maxV = 360;
+  const toX = (i: number) => (i / (expected.length - 1)) * w;
+  const toY = (v: number) => h - ((v - minV) / (maxV - minV)) * h;
+  const pathD = (arr: number[]) => arr.map((v, i) => `${i === 0 ? 'M' : 'L'}${toX(i).toFixed(1)},${toY(v).toFixed(1)}`).join(' ');
 
-              <p className="text-lg text-slate-300 mb-8 leading-relaxed">
-                Zepto, Blinkit, and Swiggy Instamart partners get automatic income protection 
-                the instant disruptions hit their zone. No forms. No waiting.
-              </p>
+  return (
+    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} style={{ overflow: 'visible' }}>
+      <path d={pathD(expected)} fill="none" stroke="rgba(249,115,22,0.7)" strokeWidth="1.5" />
+      <path d={pathD(actual)}   fill="none" stroke="rgba(34,197,94,0.7)"  strokeWidth="1.5" strokeDasharray="3 2" />
+    </svg>
+  );
+}
 
-              <div className="flex flex-wrap gap-4 mb-8">
-                <Button 
-                  variant="primary" 
-                  size="lg" 
-                  onClick={() => navigate('/onboarding')}
-                  className="shadow-2xl shadow-cyan-500/30"
-                >
-                  Get Protected — from ₹49/week
-                </Button>
-                <Button variant="ghost" size="lg" onClick={() => navigate('/admin')}>
-                  View Admin Console
-                </Button>
-              </div>
+/* ─── Hero section ─── */
+function Hero({ onJoin, sectionRef }: { onJoin: () => void; sectionRef: React.RefObject<HTMLDivElement> }) {
+  const features = [
+    { icon: '⊙', label: 'Automatic Payouts', sub: 'No Claims Needed' },
+    { icon: '◈', label: 'AI-Prediction Engine', sub: 'Income Forecasting' },
+    { icon: '◎', label: 'Environmental Coverage', sub: 'Rain, Heat, Pollution' },
+    { icon: '⊕', label: 'Instant UPI Transfer', sub: 'Under 5 Minutes' },
+  ];
 
-              <div className="flex flex-wrap gap-4 text-sm text-slate-400">
-                <span>✓ No paperwork</span>
-                <span>✓ No claim forms</span>
-                <span>✓ Fully automated</span>
-                <span>✓ Zero touch</span>
-              </div>
-            </motion.div>
+  return (
+    <section ref={sectionRef} style={{ 
+      paddingTop: 110, paddingBottom: 0, minHeight: '100vh', position: 'relative', overflow: 'hidden',
+      backgroundImage: `url("${landingBgUrl}")`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat'
+    }}>
+      {/* Dark overlay to ensure text is readable against the photo -- reduced opacity and made a gradient so right side is clearer */}
+      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(12, 17, 23, 0.85) 0%, rgba(12, 17, 23, 0.4) 50%, rgba(12, 17, 23, 0.1) 100%)', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.025) 1px, transparent 1px)', backgroundSize: '32px 32px', pointerEvents: 'none' }} />
 
-            {/* Right Column - Animated Payout Card */}
-            <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="relative"
-            >
-              <div className="relative h-96 flex items-center justify-center">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={currentPayoutIndex}
-                    initial={{ opacity: 0, y: 50, scale: 0.9 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -50, scale: 0.9 }}
-                    transition={{ duration: 0.5 }}
-                    className="absolute w-full max-w-md"
-                  >
-                    <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-6 shadow-2xl">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="bg-white/20 rounded-full p-3">
-                          <span className="text-3xl">💰</span>
-                        </div>
-                        <div className="bg-white/20 rounded-full px-3 py-1">
-                          <span className="text-white text-sm font-bold">✓ PAID</span>
-                        </div>
-                      </div>
-                      <div className="text-white">
-                        <div className="text-4xl font-black mb-2">
-                          ₹{currentPayout.amount}
-                        </div>
-                        <div className="text-emerald-100 font-semibold mb-1">
-                          {currentPayout.name}
-                        </div>
-                        <div className="text-emerald-50 text-sm mb-3">
-                          {currentPayout.disruption}
-                        </div>
-                        <div className="bg-white/10 rounded-lg px-3 py-2 text-xs font-mono">
-                          {currentPayout.upi}
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                </AnimatePresence>
-              </div>
-            </motion.div>
+      {/* Moved text more to the left by reducing margin/padding and stretching container */}
+      <div style={{ width: '100%', padding: '80px 5%', position: 'relative', zIndex: 10 }}>
+
+        {/* LEFT */}
+        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} style={{ maxWidth: '650px' }}>
+          {/* Partner badges */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28 }}>
+            <span style={{ fontFamily: font.label, fontSize: 11, color: C.mutedLight, letterSpacing: '0.16em', textTransform: 'uppercase' }}>Preferred Partners</span>
+            {['Zepto', 'Blinkit', 'Swiggy'].map(p => (
+              <span key={p} style={{ fontFamily: font.label, fontSize: 11, fontWeight: 600, background: C.surface2, color: C.muted, border: `1px solid ${C.border}`, borderRadius: 4, padding: '3px 8px' }}>{p}</span>
+            ))}
           </div>
-        </div>
-      </section>
 
-      {/* Stats Bar */}
-      <section className="border-y border-slate-700 bg-slate-800/50">
-        <div className="max-w-7xl mx-auto px-6 py-12">
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="text-4xl font-black text-cyan-400 mb-2">50M+</div>
-              <div className="text-slate-300">Q-Commerce gig workers unprotected in India</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-black text-cyan-400 mb-2">₹49</div>
-              <div className="text-slate-300">Weekly coverage starts from</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-black text-cyan-400 mb-2">&lt; 5 min</div>
-              <div className="text-slate-300">Average automated payout time</div>
-            </div>
+          {/* Headline */}
+          <h1 style={{ fontFamily: font.display, fontWeight: 800, fontSize: 'clamp(32px, 4.5vw, 54px)', lineHeight: 1.0, letterSpacing: '-0.02em', color: C.white, marginBottom: 20 }}>
+            YOUR EARNINGS,<br />SECURED.<br />
+            <span style={{ color: C.orange }}>INSTANT PROTECTION</span><br />
+            FOR INDIA'S GIG <br />WORKERS.
+          </h1>
+
+          {/* Sub */}
+          <p style={{ fontFamily: font.body, fontWeight: 300, fontSize: 16, color: C.muted, lineHeight: 1.75, marginBottom: 32, maxWidth: '46ch' }}>
+            AI-Powered Parametric Insurance for India's Q-Commerce Gig Workers. Automatic compensation for income loss due to external disruptions, with instant UPI payouts. No forms, no waiting.
+          </p>
+
+          {/* Feature icons row */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 36, padding: '16px', backdropFilter: 'blur(10px)', borderRadius: 10, border: `1px solid ${C.border}` }}>
+            {features.map((f) => (
+              <div key={f.label} style={{ textAlign: 'center' }}>
+                <div style={{ fontFamily: font.label, fontSize: 20, color: C.orange, marginBottom: 6 }}>{f.icon}</div>
+                <div style={{ fontFamily: font.label, fontWeight: 600, fontSize: 11, color: C.white, marginBottom: 2 }}>{f.label}</div>
+                <div style={{ fontFamily: font.body, fontSize: 11, color: C.mutedLight }}>{f.sub}</div>
+              </div>
+            ))}
           </div>
-        </div>
-      </section>
 
-      {/* How It Works */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-6">
-          <h2 className="text-4xl font-black text-center mb-16">How It Works</h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="bg-slate-800 border border-slate-700 rounded-xl p-6"
-            >
-              <div className="text-4xl mb-4">⚡</div>
-              <h3 className="text-xl font-bold mb-3">Register in 60 seconds</h3>
-              <p className="text-slate-400">
-                Your zone, platform, and shift analysed by AI instantly
-              </p>
-            </motion.div>
+          {/* CTA */}
+          <button onClick={onJoin}
+            style={{ fontFamily: font.display, fontWeight: 700, fontSize: 16, letterSpacing: '0.01em', background: C.orange, color: C.white, border: 'none', borderRadius: 8, padding: '15px 36px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}
+            onMouseEnter={e => (e.currentTarget.style.background = C.orangeHover)}
+            onMouseLeave={e => (e.currentTarget.style.background = C.orange)}
+          >
+            Get Covered Now — Free Quote <ArrowRightIcon />
+          </button>
+        </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-slate-800 border border-slate-700 rounded-xl p-6"
-            >
-              <div className="text-4xl mb-4">🛡️</div>
-              <h3 className="text-xl font-bold mb-3">Choose your weekly plan</h3>
-              <p className="text-slate-400">
-                ₹49–₹149/week. Renews every 7 days like your platform payouts
-              </p>
-            </motion.div>
+        {/* Removed RIGHT hand illustration blocks and float cards since the background image handles this aspect already */}
+      </div>
+    </section>
+  );
+}
+function HowItWorks({ onJoin, sectionRef }: { onJoin: () => void; sectionRef: React.RefObject<HTMLDivElement> }) {
+  const steps = [
+    { n: '01', title: 'Link Account', desc: 'Register with your phone, city, and platform details.' },
+    { n: '02', title: 'Set Policy', desc: 'Choose Basic, Standard, or Premium. Coverage starts instantly.' },
+    { n: '03', title: 'Trigger Detection', desc: 'AI monitors weather, AQI, and traffic for your zone 24/7.' },
+    { n: '04', title: 'Automatic Payout', desc: 'Income loss verified. UPI credited. You do nothing.' },
+  ];
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="bg-slate-800 border border-slate-700 rounded-xl p-6"
-            >
-              <div className="text-4xl mb-4">💰</div>
-              <h3 className="text-xl font-bold mb-3">Get paid automatically</h3>
-              <p className="text-slate-400">
-                Disruption detected → claim filed → UPI credited. You do nothing
-              </p>
-            </motion.div>
+  return (
+    <section ref={sectionRef} style={{ padding: '80px 40px', position: 'relative', zIndex: 10 }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: 60 }}>
+            <p style={{ fontFamily: font.label, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.orange, marginBottom: 10 }}>How It Works</p>
+            <h2 style={{ fontFamily: font.display, fontWeight: 800, fontSize: 36, color: C.white, letterSpacing: '-0.02em' }}>Four steps to complete protection.</h2>
           </div>
-        </div>
-      </section>
 
-      {/* Disruptions We Cover */}
-      <section className="py-20 bg-slate-800/30">
-        <div className="max-w-7xl mx-auto px-6">
-          <h2 className="text-4xl font-black text-center mb-16">Disruptions We Cover</h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            {[
-              { icon: CloudRain, title: 'Heavy Rain & Floods', desc: 'When roads become rivers' },
-              { icon: Factory, title: 'Pollution (AQI 200+)', desc: 'Toxic air, zero orders' },
-              { icon: Thermometer, title: 'Extreme Heat (42°C+)', desc: 'Too hot to deliver' },
-              { icon: Navigation, title: 'Traffic Shutdowns', desc: 'Roads blocked, income stopped' },
-              { icon: Store, title: 'Dark Store Closure', desc: 'No store, no deliveries' },
-              { icon: AlertCircle, title: 'Curfews & Strikes', desc: 'City lockdowns covered' }
-            ].map((item, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ delay: idx * 0.1 }}
-                className="bg-slate-800 border border-slate-700 rounded-xl p-6 hover:border-cyan-500/50 transition-all"
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 0, position: 'relative' }}>
+            {/* connector line */}
+            <div style={{ position: 'absolute', top: 36, left: '12.5%', right: '12.5%', height: 1, background: C.border }} />
+
+            {steps.map((s, i) => (
+              <motion.div key={i}
+                initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
+                style={{ 
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', 
+                  padding: '32px 20px', 
+                  background: 'rgba(255, 255, 255, 0.03)', 
+                  backdropFilter: 'blur(16px)', 
+                  border: '1px solid rgba(255, 255, 255, 0.1)', 
+                  borderRadius: 16, 
+                  boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
+                  margin: '0 10px',
+                  position: 'relative',
+                  zIndex: 2
+                }}
               >
-                <item.icon className="w-10 h-10 text-cyan-400 mb-4" />
-                <h3 className="text-lg font-bold mb-2">{item.title}</h3>
-                <p className="text-slate-400 text-sm">{item.desc}</p>
+                <div style={{
+                  width: 64, height: 64, borderRadius: '50%', background: 'rgba(255,255,255,0.05)', border: `1px solid rgba(255,255,255,0.1)`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20,
+                }}>
+                  <span style={{ fontFamily: font.display, fontWeight: 900, fontSize: 22, color: i === 3 ? C.orange : C.white }}>{s.n}</span>
+                </div>
+                <h3 style={{ fontFamily: font.display, fontWeight: 700, fontSize: 18, color: C.white, marginBottom: 8 }}>{s.title}</h3>
+                <p style={{ fontFamily: font.body, fontSize: 14, color: C.muted, lineHeight: 1.7 }}>{s.desc}</p>
               </motion.div>
             ))}
           </div>
-        </div>
-      </section>
+      </div>
+    </section>
+  );
+}
 
-      {/* Why Q-Commerce Workers Are Most At Risk */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-6">
-          <h2 className="text-4xl font-black text-center mb-16">
-            Why Q-Commerce Workers Are Most At Risk
-          </h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-gradient-to-br from-red-500/10 to-orange-500/10 border border-red-500/20 rounded-xl p-6">
-              <div className="text-3xl font-black text-red-400 mb-3">Zone-locked 2km</div>
-              <p className="text-slate-300">
-                One flooded road eliminates your entire income
-              </p>
+/* ─── Plans ─── */
+function Plans({ onJoin, sectionRef }: { onJoin: () => void; sectionRef: React.RefObject<HTMLDivElement> }) {
+  const plans = [
+    { name: 'Basic', price: '₹49', period: '/ week', max: '₹1,500', color: C.border, badge: null },
+    { name: 'Standard', price: '₹89', period: '/ week', max: '₹2,500', color: C.orange, badge: 'Most Popular' },
+    { name: 'Premium', price: '₹149', period: '/ week', max: '₹4,000', color: C.border, badge: null },
+  ];
+
+  const features = {
+    Basic: ['Heavy Rain & Floods', 'Severe Pollution (AQI 250+)'],
+    Standard: ['Heavy Rain & Floods', 'Severe Pollution (AQI 200+)', 'Extreme Heat (43°C+)', 'Traffic Shutdown'],
+    Premium: ['Heavy Rain & Floods', 'Severe Pollution (AQI 180+)', 'Extreme Heat (42°C+)', 'Traffic Shutdown', 'Dark Store Closure', 'Curfews & Strikes', 'Platform Outages'],
+  };
+
+  return (
+    <section ref={sectionRef} style={{ padding: '80px 40px', position: 'relative', zIndex: 10 }}>
+      <div style={{ maxWidth: 1280, margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: 56 }}>
+          <p style={{ fontFamily: font.label, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.orange, marginBottom: 10 }}>Coverage Plans</p>
+          <h2 style={{ fontFamily: font.display, fontWeight: 800, fontSize: 36, color: C.white, letterSpacing: '-0.02em' }}>Coverage that matches your shift.</h2>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24 }}>
+          {plans.map((p) => {
+            const isPopular = p.badge === 'Most Popular';
+            return (
+              <motion.div key={p.name}
+                initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+                style={{
+                  background: isPopular ? 'rgba(249, 115, 22, 0.08)' : 'rgba(255, 255, 255, 0.03)',
+                  backdropFilter: 'blur(16px)',
+                  border: `1px solid ${isPopular ? 'rgba(249, 115, 22, 0.4)' : 'rgba(255, 255, 255, 0.1)'}`,
+                  borderRadius: 16,
+                  padding: '32px 28px',
+                  position: 'relative',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)'
+                }}
+              >
+                {p.badge && (
+                  <div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: C.orange, borderRadius: 4, padding: '3px 12px' }}>
+                    <span style={{ fontFamily: font.label, fontSize: 11, fontWeight: 700, color: C.white, letterSpacing: '0.06em' }}>{p.badge}</span>
+                  </div>
+                )}
+                <div style={{ marginBottom: 20 }}>
+                  <div style={{ fontFamily: font.display, fontWeight: 700, fontSize: 15, color: C.orange, marginBottom: 6, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{p.name}</div>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+                    <span style={{ fontFamily: font.display, fontWeight: 900, fontSize: 40, color: C.white }}>{p.price}</span>
+                    <span style={{ fontFamily: font.body, fontSize: 14, color: C.muted }}>{p.period}</span>
+                  </div>
+                  <div style={{ fontFamily: font.body, fontSize: 13, color: C.muted, marginTop: 4 }}>Up to {p.max} / week</div>
+                </div>
+
+                <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: 20, marginBottom: 24 }}>
+                  {(features[p.name as keyof typeof features]).map(f => (
+                    <div key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 10 }}>
+                      <div style={{ marginTop: 1, flexShrink: 0 }}><CheckIcon /></div>
+                      <span style={{ fontFamily: font.body, fontSize: 13, color: C.muted }}>{f}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <button onClick={onJoin}
+                  style={{
+                    width: '100%', fontFamily: font.display, fontWeight: 700, fontSize: 14,
+                    background: isPopular ? C.orange : 'transparent',
+                    color: isPopular ? C.white : C.orange,
+                    border: `1px solid ${isPopular ? C.orange : 'rgba(249,115,22,0.4)'}`,
+                    borderRadius: 6, padding: '12px', cursor: 'pointer',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = C.orange; e.currentTarget.style.color = C.white; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = isPopular ? C.orange : 'transparent'; e.currentTarget.style.color = isPopular ? C.white : C.orange; }}
+                >Choose {p.name}</button>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── FAQ ─── */
+function FAQ({ sectionRef }: { sectionRef: React.RefObject<HTMLDivElement> }) {
+  const faqs = [
+    { q: 'Is there a waiting period?', a: 'Coverage starts as soon as your first weekly premium is paid.' },
+    { q: 'How do I claim?', a: 'You don\'t! Our AI detects disruptions and initiates UPI payouts automatically.' },
+    { q: 'Which cities are covered?', a: 'Currently Hyderabad, Bangalore, Mumbai, Delhi, Chennai, and Pune.' },
+    { q: 'Can I cancel anytime?', a: 'Yes, just toggle off "Auto-Renew" in your dashboard.' }
+  ];
+
+  return (
+    <section ref={sectionRef} style={{ padding: '80px 40px', position: 'relative', zIndex: 10 }}>
+      <div style={{ maxWidth: 800, margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: 48 }}>
+          <p style={{ fontFamily: font.label, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.orange, marginBottom: 10 }}>FAQ</p>
+          <h2 style={{ fontFamily: font.display, fontWeight: 800, fontSize: 36, color: C.white, letterSpacing: '-0.02em' }}>Common Questions</h2>
+        </div>
+        <div style={{ display: 'grid', gap: 16 }}>
+          {faqs.map((f, i) => (
+            <div key={i} style={{ 
+              padding: '24px', background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(16px)', 
+              border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: 12 
+            }}>
+              <h3 style={{ fontFamily: font.display, fontWeight: 700, fontSize: 18, color: C.white, marginBottom: 8 }}>{f.q}</h3>
+              <p style={{ fontFamily: font.body, fontSize: 15, color: C.muted, lineHeight: 1.6 }}>{f.a}</p>
             </div>
-            <div className="bg-gradient-to-br from-amber-500/10 to-yellow-500/10 border border-amber-500/20 rounded-xl p-6">
-              <div className="text-3xl font-black text-amber-400 mb-3">10-min delivery pressure</div>
-              <p className="text-slate-300">
-                No rerouting possible. Rain = cancelled orders immediately
-              </p>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── Partners + Testimonial ─── */
+function PartnersAndTestimonial() {
+  return (
+    <section style={{ padding: '48px 40px', position: 'relative', zIndex: 10 }}>
+      <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 40, flexWrap: 'wrap' }}>
+
+        {/* Partners */}
+        <div>
+          <div style={{ fontFamily: font.label, fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: C.mutedLight, marginBottom: 20 }}>Preferred Platform Partners</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
+            {[
+              { name: 'Zepto', color: '#7C3AED' },
+              { name: 'blinkit', color: '#F59E0B' },
+              { name: 'Swiggy Instamart', color: '#F97316' },
+            ].map(p => (
+              <div key={p.name} style={{ fontFamily: font.display, fontWeight: 900, fontSize: 20, color: p.color, letterSpacing: '-0.01em' }}>{p.name}</div>
+            ))}
+          </div>
+        </div>
+
+        {/* Testimonial */}
+        <div style={{ 
+          background: 'rgba(255, 255, 255, 0.03)', 
+          backdropFilter: 'blur(16px)', 
+          border: '1px solid rgba(255, 255, 255, 0.1)', 
+          borderRadius: 16, 
+          padding: '24px 28px', 
+          maxWidth: 360,
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)'
+        }}>
+          <div style={{ fontFamily: font.label, fontSize: 22, color: C.orange, marginBottom: 8, lineHeight: 1 }}>"</div>
+          <p style={{ fontFamily: font.body, fontSize: 14, color: C.muted, lineHeight: 1.7, marginBottom: 16 }}>
+            Last monsoon I lost 4 days of income. With SwiftCover, ₹1,200 was in my UPI before I even checked the app. This is the real deal.
+          </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#1A5F3C', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: font.display, fontWeight: 700, fontSize: 14, color: C.white }}>R</div>
+            <div>
+              <div style={{ fontFamily: font.label, fontWeight: 600, fontSize: 13, color: C.white }}>Rahul Kumar</div>
+              <div style={{ fontFamily: font.body, fontSize: 12, color: C.mutedLight }}>Zepto Partner, Hyderabad</div>
             </div>
-            <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-xl p-6">
-              <div className="text-3xl font-black text-purple-400 mb-3">₹0 base salary</div>
-              <p className="text-slate-300">
-                Pure order income. 0 deliveries = ₹0. No safety net
-              </p>
+            <div style={{ marginLeft: 'auto', display: 'flex', gap: 2 }}>
+              {[...Array(5)].map((_, i) => (
+                <svg key={i} width="12" height="12" viewBox="0 0 24 24" fill={C.orange}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              ))}
             </div>
           </div>
         </div>
-      </section>
+      </div>
+    </section>
+  );
+}
 
-      {/* Footer */}
-      <footer className="border-t border-slate-700 py-8">
-        <div className="max-w-7xl mx-auto px-6 text-center text-slate-400 text-sm">
-          <p>SwiftCover — AI-Powered Parametric Micro-Insurance for Q-Commerce Workers</p>
-          <p className="mt-2">Built for Guidewire DEVTrails 2026</p>
+/* ─── Footer ─── */
+function Footer({ onAdmin }: { onAdmin: () => void }) {
+  return (
+    <footer style={{ padding: '24px 40px', position: 'relative', zIndex: 10 }}>
+      <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <ShieldIcon />
+          <span style={{ fontFamily: font.display, fontWeight: 800, fontSize: 16, color: C.white }}>SwiftCover</span>
         </div>
-      </footer>
+        <span style={{ fontFamily: font.body, fontSize: 12, color: C.mutedLight }}>Guidewire DEVTrails 2026 · AI-Powered Parametric Micro-Insurance</span>
+        <button onClick={onAdmin} style={{ fontFamily: font.label, fontSize: 12, color: C.mutedLight, background: 'none', border: 'none', cursor: 'pointer' }}>Admin Console</button>
+      </div>
+    </footer>
+  );
+}
+
+/* ─── Page ─── */
+export const Landing: React.FC = () => {
+  const navigate = useNavigate();
+  useFonts();
+  
+  const swiftRef = useRef<HTMLDivElement>(null);
+  const howRef = useRef<HTMLDivElement>(null);
+  const plansRef = useRef<HTMLDivElement>(null);
+  const faqRef = useRef<HTMLDivElement>(null);
+
+  const scrollTo = (id: string) => {
+    const refs: Record<string, React.RefObject<HTMLDivElement>> = {
+      SwiftCover: swiftRef,
+      HowItWorks: howRef,
+      CoveragePlans: plansRef,
+      FAQ: faqRef
+    };
+    refs[id]?.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const onJoin = () => navigate('/onboarding');
+  const onAdmin = () => navigate('/admin');
+
+  return (
+    <div style={{ background: C.bg }}>
+      <Navbar onJoin={onJoin} onAdmin={onAdmin} scrollTo={scrollTo} />
+      <Hero onJoin={onJoin} sectionRef={swiftRef} />
+      
+      <div style={{ 
+        position: 'relative', overflow: 'hidden',
+        backgroundImage: `url("${howItWorksBgUrl}")`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundAttachment: 'fixed'
+      }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(12, 17, 23, 0.85) 0%, rgba(12, 17, 23, 0.4) 50%, rgba(12, 17, 23, 0.1) 100%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.025) 1px, transparent 1px)', backgroundSize: '32px 32px', pointerEvents: 'none' }} />
+
+        <HowItWorks onJoin={onJoin} sectionRef={howRef} />
+        <Plans onJoin={onJoin} sectionRef={plansRef} />
+        <FAQ sectionRef={faqRef} />
+        <PartnersAndTestimonial />
+        <Footer onAdmin={onAdmin} />
+      </div>
     </div>
   );
 };
