@@ -1,6 +1,6 @@
-"""Workers router - registration, dashboard, and worker management."""
+"""Workers router - registration, login, dashboard, and worker management."""
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Body
 from sqlalchemy.orm import Session
 from typing import List
 from datetime import datetime, timedelta
@@ -14,24 +14,32 @@ from services.premium_engine import compute_plans
 router = APIRouter(prefix="/api/workers", tags=["workers"])
 
 
+# ─── IMPORTANT: specific string routes MUST come before /{worker_id} ─────────
+
+@router.post("/login", response_model=WorkerResponse)
+def login_worker(phone: str, db: Session = Depends(get_db)):
+    """Login by phone number. Returns full worker profile."""
+    worker = db.query(Worker).filter(
+        Worker.phone == phone,
+        Worker.is_active == True
+    ).first()
+    if not worker:
+        raise HTTPException(
+            status_code=404,
+            detail="No account found with this phone number. Please register first."
+        )
+    return _worker_to_response(worker)
+
+
 @router.post("/register", response_model=WorkerOnboardingResponse)
 def register_worker(worker_data: WorkerCreate, db: Session = Depends(get_db)):
     """
     Register a new worker and return onboarding data with risk profile and plan options.
-    
-    Steps:
-    1. Validate phone is unique
-    2. Compute risk score and tier using RiskModel
-    3. Save worker to database
-    4. Generate 3 plan options with AI-adjusted premiums
-    5. Return complete onboarding response
     """
-    # Check if phone already exists
     existing = db.query(Worker).filter(Worker.phone == worker_data.phone).first()
     if existing:
         raise HTTPException(status_code=400, detail="Phone number already registered")
-    
-    # Compute risk profile
+
     risk_model = RiskModel()
     risk_score, risk_tier, risk_factors = risk_model.compute({
         "city": worker_data.city,
@@ -41,14 +49,10 @@ def register_worker(worker_data: WorkerCreate, db: Session = Depends(get_db)):
         "avg_daily_orders": worker_data.avg_daily_orders,
         "shift_type": worker_data.shift_type
     })
-    
-    # Get zone-specific risks
+
     zone_risks = risk_model.get_zone_risks(worker_data.city, worker_data.zone_name)
-    
-    # Calculate avg daily earnings (orders × ₹18 per order)
     avg_daily_earnings = worker_data.avg_daily_orders * 18
-    
-    # Create worker
+
     worker = Worker(
         name=worker_data.name,
         phone=worker_data.phone,
@@ -67,37 +71,13 @@ def register_worker(worker_data: WorkerCreate, db: Session = Depends(get_db)):
         zone_pollution_risk=zone_risks["zone_pollution_risk"],
         upi_id=worker_data.upi_id
     )
-    
+
     db.add(worker)
     db.commit()
     db.refresh(worker)
-    
-    # Generate plan options
+
     plans = compute_plans(worker)
-    
-    # Build response
-    worker_response = WorkerResponse(
-        id=worker.id,
-        name=worker.name,
-        phone=worker.phone,
-        city=worker.city,
-        dark_store_name=worker.dark_store_name,
-        zone_name=worker.zone_name,
-        platform=worker.platform.value,
-        avg_daily_orders=worker.avg_daily_orders,
-        avg_daily_earnings=worker.avg_daily_earnings,
-        shift_type=worker.shift_type.value,
-        experience_months=worker.experience_months,
-        risk_score=worker.risk_score,
-        risk_tier=worker.risk_tier.value,
-        zone_flood_risk=worker.zone_flood_risk,
-        zone_heat_risk=worker.zone_heat_risk,
-        zone_pollution_risk=worker.zone_pollution_risk,
-        upi_id=worker.upi_id,
-        created_at=worker.created_at.isoformat(),
-        is_active=worker.is_active
-    )
-    
+
     risk_profile = RiskProfile(
         risk_score=risk_score,
         risk_tier=risk_tier,
@@ -106,62 +86,55 @@ def register_worker(worker_data: WorkerCreate, db: Session = Depends(get_db)):
         zone_heat_risk=zone_risks["zone_heat_risk"],
         zone_pollution_risk=zone_risks["zone_pollution_risk"]
     )
-    
-    message = f"Welcome {worker.name}! Your risk profile has been analyzed."
-    
+
     return WorkerOnboardingResponse(
-        worker=worker_response,
+        worker=_worker_to_response(worker),
         risk_profile=risk_profile,
         recommended_plans=plans,
-        message=message
+        message=f"Welcome {worker.name}! Your risk profile has been analyzed."
     )
 
 
+@router.get("/", response_model=List[WorkerResponse])
+def get_all_workers(db: Session = Depends(get_db)):
+    """Get all active workers (admin endpoint)."""
+    workers = db.query(Worker).filter(Worker.is_active == True).all()
+    return [_worker_to_response(w) for w in workers]
+
+
+# ─── Routes with path params come LAST ───────────────────────────────────────
+
 @router.get("/{worker_id}/dashboard")
 def get_worker_dashboard(worker_id: int, db: Session = Depends(get_db)):
-    """
-    Get complete dashboard data for a worker in a single request.
-    
-    Returns:
-    - Worker details
-    - Active policy (if any)
-    - Active disruptions in worker's city
-    - This week's stats (earnings, coverage used)
-    - 14-day earnings chart data
-    - Recent claims (last 5)
-    """
+    """Get complete dashboard data for a worker in a single request."""
     worker = db.query(Worker).filter(Worker.id == worker_id).first()
     if not worker:
         raise HTTPException(status_code=404, detail="Worker not found")
-    
-    # Get active policy
+
     active_policy = db.query(Policy).filter(
         Policy.worker_id == worker_id,
         Policy.status == "active",
         Policy.end_date >= datetime.utcnow().date()
     ).first()
-    
-    # Get active disruptions in worker's city
+
     active_disruptions = db.query(DisruptionEvent).filter(
         DisruptionEvent.city == worker.city,
         DisruptionEvent.is_active == True
     ).all()
-    
-    # Calculate this week's stats
+
     today = datetime.utcnow().date()
-    week_start = today - timedelta(days=today.weekday())  # Monday
-    
+    week_start = today - timedelta(days=today.weekday())
+
     this_week_activities = db.query(WorkerActivity).filter(
         WorkerActivity.worker_id == worker_id,
         WorkerActivity.date >= week_start,
         WorkerActivity.date <= today
     ).all()
-    
+
     this_week_earnings = sum(a.earnings for a in this_week_activities)
     this_week_orders = sum(a.orders_completed for a in this_week_activities)
-    
-    # Calculate coverage used this week
-    coverage_used = 0
+
+    coverage_used = 0.0
     if active_policy:
         this_week_claims = db.query(Claim).filter(
             Claim.worker_id == worker_id,
@@ -170,50 +143,50 @@ def get_worker_dashboard(worker_id: int, db: Session = Depends(get_db)):
             Claim.status.in_(["approved", "paid"])
         ).all()
         coverage_used = sum(c.payout_amount for c in this_week_claims)
-    
-    # Get 14-day earnings chart data
+
     fourteen_days_ago = today - timedelta(days=13)
     earnings_data = db.query(WorkerActivity).filter(
         WorkerActivity.worker_id == worker_id,
         WorkerActivity.date >= fourteen_days_ago,
         WorkerActivity.date <= today
     ).order_by(WorkerActivity.date).all()
-    
-    earnings_chart = []
-    for activity in earnings_data:
-        earnings_chart.append({
-            "date": activity.date.isoformat(),
-            "actual_earnings": activity.earnings,
-            "expected_earnings": worker.avg_daily_earnings,  # Simplified
-            "is_disruption_day": activity.is_disruption_day
-        })
-    
-    # Get recent claims (last 5)
+
+    earnings_chart = [
+        {
+            "date": a.date.isoformat(),
+            "actual": a.earnings,
+            "expected": worker.avg_daily_earnings,
+            "actual_earnings": a.earnings,
+            "expected_earnings": worker.avg_daily_earnings,
+            "isDisruption": a.is_disruption_day,
+            "is_disruption_day": a.is_disruption_day,
+        }
+        for a in earnings_data
+    ]
+
     recent_claims = db.query(Claim).filter(
         Claim.worker_id == worker_id
     ).order_by(Claim.claim_date.desc()).limit(5).all()
-    
+
     claims_data = []
     for claim in recent_claims:
         disruption = db.query(DisruptionEvent).filter(
             DisruptionEvent.id == claim.disruption_event_id
         ).first()
-        
         claims_data.append({
             "id": claim.id,
             "claim_date": claim.claim_date.isoformat(),
-            "disruption_type": disruption.disruption_type.value if disruption else None,
+            "disruption_type": disruption.disruption_type.value if disruption else "unknown",
             "expected_earnings": claim.expected_earnings,
             "actual_earnings": claim.actual_earnings,
             "payout_amount": claim.payout_amount,
             "status": claim.status.value,
-            "upi_transaction_id": claim.upi_transaction_id
+            "upi_transaction_id": claim.upi_transaction_id,
         })
-    
-    # Build policy response
+
     policy_data = None
     if active_policy:
-        days_remaining = (active_policy.end_date - today).days
+        days_remaining = max((active_policy.end_date - today).days, 0)
         policy_data = {
             "id": active_policy.id,
             "plan_type": active_policy.plan_type.value,
@@ -224,70 +197,46 @@ def get_worker_dashboard(worker_id: int, db: Session = Depends(get_db)):
             "start_date": active_policy.start_date.isoformat(),
             "end_date": active_policy.end_date.isoformat(),
             "days_remaining": days_remaining,
-            "coverage_used_this_week": coverage_used
+            "auto_renew": active_policy.auto_renew,
+            "coverage_used_this_week": coverage_used,
         }
-    
-    # Build disruptions data
-    disruptions_data = []
-    for disruption in active_disruptions:
-        disruptions_data.append({
-            "id": disruption.id,
-            "disruption_type": disruption.disruption_type.value,
-            "severity": disruption.severity.value,
-            "started_at": disruption.started_at.isoformat()
-        })
-    
+
     return {
         "worker": {
             "id": worker.id,
             "name": worker.name,
             "phone": worker.phone,
             "city": worker.city,
+            "dark_store_name": worker.dark_store_name,
             "zone_name": worker.zone_name,
             "platform": worker.platform.value,
-            "risk_tier": worker.risk_tier.value
+            "shift_type": worker.shift_type.value,
+            "avg_daily_orders": worker.avg_daily_orders,
+            "avg_daily_earnings": worker.avg_daily_earnings,
+            "experience_months": worker.experience_months,
+            "risk_score": worker.risk_score,
+            "risk_tier": worker.risk_tier.value,
+            "upi_id": worker.upi_id,
         },
         "active_policy": policy_data,
-        "active_disruptions": disruptions_data,
+        "active_disruptions": [
+            {
+                "id": d.id,
+                "disruption_type": d.disruption_type.value,
+                "severity": d.severity.value,
+                "city": d.city,
+                "started_at": d.started_at.isoformat(),
+            }
+            for d in active_disruptions
+        ],
         "this_week_stats": {
             "earnings": this_week_earnings,
             "orders": this_week_orders,
-            "coverage_used": coverage_used
+            "coverage_used": coverage_used,
         },
         "earnings_chart": earnings_chart,
-        "recent_claims": claims_data
+        "recent_claims": claims_data,
     }
-
-
-@router.get("/", response_model=List[WorkerResponse])
-def get_all_workers(db: Session = Depends(get_db)):
-    """Get all active workers (admin endpoint)."""
-    workers = db.query(Worker).filter(Worker.is_active == True).all()
-    
-    return [
-        WorkerResponse(
-            id=w.id,
-            name=w.name,
-            phone=w.phone,
-            city=w.city,
-            dark_store_name=w.dark_store_name,
-            zone_name=w.zone_name,
-            platform=w.platform.value,
-            avg_daily_orders=w.avg_daily_orders,
-            avg_daily_earnings=w.avg_daily_earnings,
-            shift_type=w.shift_type.value,
-            experience_months=w.experience_months,
-            risk_score=w.risk_score,
-            risk_tier=w.risk_tier.value,
-            zone_flood_risk=w.zone_flood_risk,
-            zone_heat_risk=w.zone_heat_risk,
-            zone_pollution_risk=w.zone_pollution_risk,
-            upi_id=w.upi_id,
-            created_at=w.created_at.isoformat(),
-            is_active=w.is_active
-        )
-        for w in workers
-    ]
 
 
 @router.get("/{worker_id}", response_model=WorkerResponse)
@@ -296,7 +245,12 @@ def get_worker(worker_id: int, db: Session = Depends(get_db)):
     worker = db.query(Worker).filter(Worker.id == worker_id).first()
     if not worker:
         raise HTTPException(status_code=404, detail="Worker not found")
-    
+    return _worker_to_response(worker)
+
+
+# ─── Helper ───────────────────────────────────────────────────────────────────
+
+def _worker_to_response(worker: Worker) -> WorkerResponse:
     return WorkerResponse(
         id=worker.id,
         name=worker.name,

@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
-import { AlertTriangle, X } from 'lucide-react';
+import { AlertTriangle, X, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Badge } from './ui/Badge';
+
+const font = {
+  display: "'Barlow', sans-serif",
+  label: "'Space Grotesk', sans-serif",
+};
 
 interface DisruptionEvent {
   id: number;
@@ -16,7 +20,6 @@ interface DisruptionAlertProps {
 
 export const DisruptionAlert: React.FC<DisruptionAlertProps> = ({ disruptions }) => {
   const [dismissed, setDismissed] = useState(false);
-
   if (disruptions.length === 0 || dismissed) return null;
 
   const disruption = disruptions[0];
@@ -25,51 +28,51 @@ export const DisruptionAlert: React.FC<DisruptionAlertProps> = ({ disruptions })
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ opacity: 0, y: -20 }}
+        initial={{ opacity: 0, y: -16 }}
         animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -20 }}
-        className={`w-full ${
-          isExtreme 
-            ? 'bg-gradient-to-r from-red-500/20 to-orange-500/20 border-red-500/50' 
-            : 'bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border-amber-500/50'
-        } border rounded-lg p-4 mb-6 relative`}
+        exit={{ opacity: 0, y: -16 }}
+        className={`w-full rounded-2xl p-4 relative overflow-hidden border ${
+          isExtreme
+            ? 'bg-red-500/10 border-red-500/30'
+            : 'bg-amber-500/10 border-amber-500/30'
+        }`}
       >
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <motion.div
-              animate={{ scale: [1, 1.1, 1] }}
+              animate={{ scale: [1, 1.15, 1] }}
               transition={{ repeat: Infinity, duration: 2 }}
+              className={`p-2 rounded-xl ${isExtreme ? 'bg-red-500/20' : 'bg-amber-500/20'}`}
             >
-              <AlertTriangle className={`w-6 h-6 ${isExtreme ? 'text-red-400' : 'text-amber-400'}`} />
+              <AlertTriangle className={`w-5 h-5 ${isExtreme ? 'text-red-400' : 'text-amber-400'}`} />
             </motion.div>
-            
-            <div className="flex items-center gap-3">
-              <span className="text-slate-100 font-semibold">
-                {disruption.disruption_type.replace(/_/g, ' ').toUpperCase()}
-              </span>
-              <Badge variant={disruption.severity as any} size="sm">
-                {disruption.severity}
-              </Badge>
-              <span className="text-slate-300 text-sm">
-                detected in {disruption.city}
-              </span>
+
+            <div>
+              <p className="text-sm font-black text-white/90 uppercase tracking-wide" style={{ fontFamily: font.display }}>
+                {disruption.disruption_type.replace(/_/g, ' ')}
+              </p>
+              <p className="text-xs text-white/40 mt-0.5" style={{ fontFamily: font.label }}>
+                {disruption.severity.toUpperCase()} · {disruption.city} · Claim auto-processing
+              </p>
             </div>
-            
-            <div className="ml-4 text-slate-300 text-sm flex items-center gap-2">
+
+            <div className="flex items-center gap-2 ml-2">
               <motion.div
-                animate={{ opacity: [0.5, 1, 0.5] }}
+                animate={{ opacity: [0.4, 1, 0.4] }}
                 transition={{ repeat: Infinity, duration: 1.5 }}
-                className="w-2 h-2 bg-cyan-400 rounded-full"
+                className="w-1.5 h-1.5 rounded-full bg-[#F97316]"
               />
-              Claim auto-processing...
+              <span className="text-[10px] font-black text-[#F97316] uppercase tracking-widest" style={{ fontFamily: font.label }}>
+                Live
+              </span>
             </div>
           </div>
-          
+
           <button
             onClick={() => setDismissed(true)}
-            className="text-slate-400 hover:text-slate-200 transition-colors"
+            className="p-1.5 hover:bg-white/10 rounded-lg transition-colors text-white/30 hover:text-white/60"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
       </motion.div>

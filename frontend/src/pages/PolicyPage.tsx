@@ -1,176 +1,238 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft } from 'lucide-react';
-import { getWorkerPolicies, getWorker } from '../api/client';
-import { Button } from '../components/ui/Button';
+import { Shield, RotateCcw, CheckCircle } from 'lucide-react';
+import { getWorkerPolicies, getWorker, renewPolicy } from '../api/client';
 import { Badge } from '../components/ui/Badge';
-import { Card } from '../components/ui/Card';
-import { Skeleton } from '../components/ui/Skeleton';
+import { PageShell } from '../components/PageShell';
 import { format } from 'date-fns';
+import { motion } from 'framer-motion';
+import { clsx } from 'clsx';
+import toast from 'react-hot-toast';
+
+const font = {
+  display: "'Barlow', sans-serif",
+  body: "'DM Sans', sans-serif",
+  label: "'Space Grotesk', sans-serif",
+};
 
 export const PolicyPage: React.FC = () => {
   const { workerId } = useParams<{ workerId: string }>();
   const navigate = useNavigate();
+  const [renewingId, setRenewingId] = useState<number | null>(null);
 
   const { data: worker } = useQuery({
     queryKey: ['worker', workerId],
     queryFn: () => getWorker(parseInt(workerId!)),
-    enabled: !!workerId
+    enabled: !!workerId,
   });
 
-  const { data: policies, isLoading } = useQuery({
+  const { data: policies, isLoading, refetch } = useQuery({
     queryKey: ['policies', workerId],
     queryFn: () => getWorkerPolicies(parseInt(workerId!)),
-    enabled: !!workerId
+    enabled: !!workerId,
   });
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 py-8">
-        <div className="max-w-5xl mx-auto px-6">
-          <Skeleton variant="card" />
-        </div>
-      </div>
-    );
-  }
+  const handleRenew = async (policyId: number, planType: string) => {
+    setRenewingId(policyId);
+    try {
+      await renewPolicy(policyId);
+      toast.success(`${planType} plan renewed for another week`);
+      refetch();
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || 'Renewal failed');
+    } finally {
+      setRenewingId(null);
+    }
+  };
 
   const activePolicy = policies?.find((p: any) => p.status === 'active');
+  const historyPolicies = policies?.filter((p: any) => p.status !== 'active') || [];
+
+  const navItems = workerId ? [
+    { label: 'Dashboard', path: `/dashboard/${workerId}` },
+    { label: 'Claims', path: `/claims/${workerId}` },
+    { label: 'Profile', path: `/profile/${workerId}` },
+  ] : [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 py-8">
-      <div className="max-w-5xl mx-auto px-6">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <Button variant="ghost" size="sm" onClick={() => navigate(`/dashboard/${workerId}`)}>
-            <ArrowLeft className="w-4 h-4" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-black text-slate-100">Policy Management</h1>
-            {worker && (
-              <p className="text-slate-400 mt-1">{worker.name} • {worker.city}</p>
-            )}
-          </div>
+    <PageShell
+      workerId={workerId}
+      pageLabel="Policy Control"
+      overline="Protection Node"
+      navItems={navItems}
+    >
+      {/* Page header */}
+      <div className="mb-10">
+        <p className="text-[10px] font-black text-[#F97316] uppercase tracking-[0.2em] mb-2" style={{ fontFamily: font.label }}>
+          Protection Node
+        </p>
+        <h1 className="text-4xl font-black tracking-tight mb-1" style={{ fontFamily: font.display }}>
+          Policy Control
+        </h1>
+        {worker && (
+          <p className="text-white/40 text-sm font-medium">{worker.name} · {worker.zone_name}</p>
+        )}
+      </div>
+
+      {isLoading ? (
+        <div className="space-y-4">
+          {[1, 2].map((i) => <div key={i} className="h-40 bg-white/[0.03] rounded-2xl animate-pulse" />)}
         </div>
+      ) : (
+        <>
+          {/* Active policy */}
+          {activePolicy ? (
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-8"
+            >
+              <div className="bg-white/[0.03] border border-[#F97316]/20 rounded-2xl p-6 relative overflow-hidden">
+                {/* Glow */}
+                <div className="absolute -top-16 -right-16 w-48 h-48 bg-[#F97316]/5 rounded-full blur-3xl pointer-events-none" />
 
-        {/* Active Policy */}
-        {activePolicy && (
-          <Card title="Active Policy" className="mb-6">
-            <div className="grid md:grid-cols-3 gap-6">
-              <div>
-                <Badge variant={activePolicy.plan_type} size="md" className="uppercase mb-3">
-                  {activePolicy.plan_type} Plan
-                </Badge>
-                <div className="space-y-2">
-                  <div>
-                    <div className="text-sm text-slate-400">Weekly Premium</div>
-                    <div className="text-2xl font-bold text-slate-100">₹{activePolicy.weekly_premium}</div>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-2 bg-[#22C55E]/10 rounded-xl">
+                    <Shield className="w-5 h-5 text-[#22C55E]" />
                   </div>
                   <div>
-                    <div className="text-sm text-slate-400">Coverage Period</div>
-                    <div className="text-slate-100">
-                      {format(new Date(activePolicy.start_date), 'MMM dd')} - {format(new Date(activePolicy.end_date), 'MMM dd, yyyy')}
+                    <p className="text-[9px] font-black text-[#22C55E] uppercase tracking-[0.2em]" style={{ fontFamily: font.label }}>
+                      Active Coverage
+                    </p>
+                    <p className="text-lg font-black text-white/80" style={{ fontFamily: font.display }}>
+                      {activePolicy.plan_type.toUpperCase()} Plan
+                    </p>
+                  </div>
+                  <Badge variant="active" size="sm" className="ml-auto">Active</Badge>
+                </div>
+
+                <div className="grid md:grid-cols-4 gap-4 mb-6">
+                  {[
+                    { label: 'Weekly Premium', value: `₹${activePolicy.weekly_premium}` },
+                    { label: 'Weekly Max', value: `₹${activePolicy.weekly_coverage_limit}` },
+                    { label: 'Daily Max', value: `₹${activePolicy.daily_coverage_limit}` },
+                    { label: 'Days Remaining', value: `${activePolicy.days_remaining}d`, highlight: activePolicy.days_remaining <= 2 },
+                  ].map((stat) => (
+                    <div key={stat.label} className="p-4 bg-white/[0.05] rounded-xl border border-white/[0.08]">
+                      <p className="text-[10px] font-black text-white/55 uppercase tracking-widest mb-1" style={{ fontFamily: font.label }}>
+                        {stat.label}
+                      </p>
+                      <p className={clsx('text-2xl font-black', stat.highlight ? 'text-amber-400' : 'text-white/80')} style={{ fontFamily: font.display }}>
+                        {stat.value}
+                      </p>
                     </div>
-                  </div>
+                  ))}
                 </div>
-              </div>
 
-              <div>
-                <div className="text-sm text-slate-400 mb-3">Coverage Limits</div>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-slate-300">Weekly Max</span>
-                    <span className="text-slate-100 font-semibold">₹{activePolicy.weekly_coverage_limit}</span>
+                {/* Coverage period bar */}
+                <div className="mb-6">
+                  <div className="flex justify-between text-[10px] font-black text-white/55 uppercase tracking-widest mb-2" style={{ fontFamily: font.label }}>
+                    <span>{format(new Date(activePolicy.start_date), 'MMM dd')}</span>
+                    <span>Coverage Period</span>
+                    <span>{format(new Date(activePolicy.end_date), 'MMM dd, yyyy')}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-300">Daily Max</span>
-                    <span className="text-slate-100 font-semibold">₹{activePolicy.daily_coverage_limit}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-300">Min Orders</span>
-                    <span className="text-slate-100 font-semibold">{activePolicy.min_orders_threshold}</span>
+                  <div className="w-full bg-white/5 rounded-full h-1.5">
+                    <div
+                      className={clsx('h-1.5 rounded-full transition-all', activePolicy.days_remaining <= 2 ? 'bg-amber-500' : 'bg-[#22C55E]')}
+                      style={{ width: `${((7 - activePolicy.days_remaining) / 7) * 100}%` }}
+                    />
                   </div>
                 </div>
-              </div>
 
-              <div>
-                <div className="text-sm text-slate-400 mb-3">Status</div>
-                <Badge variant="active" size="md" className="mb-3">
-                  Active
-                </Badge>
-                <div className="text-sm text-slate-300">
-                  {activePolicy.days_remaining} days remaining
+                {/* Covered disruptions */}
+                <div>
+                  <p className="text-[10px] font-black text-white/55 uppercase tracking-[0.2em] mb-3" style={{ fontFamily: font.label }}>
+                    Covered Disruptions
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {activePolicy.covered_disruptions.map((d: string) => (
+                      <span
+                        key={d}
+                        className="flex items-center gap-1.5 px-3 py-1 bg-white/[0.05] border border-white/[0.10] rounded-lg text-xs text-white/70"
+                        style={{ fontFamily: font.body }}
+                      >
+                        <CheckCircle className="w-3 h-3 text-[#22C55E]" />
+                        {d.replace(/_/g, ' ')}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-                {activePolicy.auto_renew && (
-                  <div className="text-sm text-cyan-400 mt-2">
-                    ✓ Auto-renewal enabled
+
+                {activePolicy.days_remaining <= 2 && (
+                  <div className="mt-6 pt-6 border-t border-white/[0.05]">
+                    <button
+                      onClick={() => handleRenew(activePolicy.id, activePolicy.plan_type)}
+                      disabled={renewingId === activePolicy.id}
+                      className="flex items-center gap-2 px-5 py-2.5 bg-[#F97316] hover:bg-[#EA6C0E] text-white rounded-xl text-sm font-black transition-all disabled:opacity-50"
+                      style={{ fontFamily: font.label }}
+                    >
+                      <RotateCcw className="w-4 h-4" />
+                      {renewingId === activePolicy.id ? 'Renewing...' : `Renew for ₹${activePolicy.weekly_premium}`}
+                    </button>
                   </div>
                 )}
               </div>
+            </motion.div>
+          ) : (
+            <div className="mb-8 bg-white/[0.03] border border-white/[0.07] rounded-2xl p-8 text-center">
+              <Shield className="w-10 h-10 text-white/10 mx-auto mb-3" />
+              <p className="text-sm font-black text-white/30 uppercase tracking-widest mb-4" style={{ fontFamily: font.label }}>
+                No active policy
+              </p>
+              <button
+                onClick={() => navigate('/onboarding')}
+                className="px-5 py-2.5 bg-[#F97316] hover:bg-[#EA6C0E] text-white rounded-xl text-sm font-black transition-all"
+                style={{ fontFamily: font.label }}
+              >
+                Get Coverage →
+              </button>
             </div>
+          )}
 
-            <div className="mt-6 pt-6 border-t border-slate-700">
-              <div className="text-sm text-slate-400 mb-3">Covered Disruptions</div>
-              <div className="flex flex-wrap gap-2">
-                {activePolicy.covered_disruptions.map((disruption: string) => (
-                  <span
-                    key={disruption}
-                    className="px-3 py-1 bg-slate-700/50 text-slate-300 text-sm rounded-lg border border-slate-600"
+          {/* Policy history */}
+          {historyPolicies.length > 0 && (
+            <div>
+              <p className="text-[10px] font-black text-white/55 uppercase tracking-[0.2em] mb-4" style={{ fontFamily: font.label }}>
+                Policy History
+              </p>
+              <div className="space-y-3">
+                {historyPolicies.map((policy: any, idx: number) => (
+                  <motion.div
+                    key={policy.id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.05 }}
+                    className="bg-white/[0.02] border border-white/[0.05] rounded-xl p-4"
                   >
-                    {disruption.replace(/_/g, ' ')}
-                  </span>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <Badge variant={policy.plan_type as any} size="sm">{policy.plan_type}</Badge>
+                        <span className="text-xs text-white/60" style={{ fontFamily: font.body }}>
+                          {format(new Date(policy.start_date), 'MMM dd')} – {format(new Date(policy.end_date), 'MMM dd, yyyy')}
+                        </span>
+                      </div>
+                      <Badge variant={policy.status as any} size="sm">{policy.status}</Badge>
+                    </div>
+                    <div className="grid grid-cols-3 gap-3">
+                      {[
+                        { label: 'Premium', value: `₹${policy.weekly_premium}/wk` },
+                        { label: 'Coverage', value: `₹${policy.weekly_coverage_limit}/wk` },
+                        { label: 'Duration', value: '7 days' },
+                      ].map((s) => (
+                        <div key={s.label}>
+                          <p className="text-[10px] text-white/55 uppercase tracking-widest mb-0.5" style={{ fontFamily: font.label }}>{s.label}</p>
+                          <p className="text-sm font-bold text-white/75">{s.value}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
                 ))}
               </div>
             </div>
-          </Card>
-        )}
-
-        {/* Policy History */}
-        <Card title="Policy History" subtitle="All policies">
-          <div className="space-y-3">
-            {policies && policies.length > 0 ? (
-              policies.map((policy: any) => (
-                <div
-                  key={policy.id}
-                  className="bg-slate-900/50 rounded-lg p-4 border border-slate-700"
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <Badge variant={policy.plan_type} size="sm" className="uppercase mb-2">
-                        {policy.plan_type}
-                      </Badge>
-                      <div className="text-sm text-slate-400">
-                        {format(new Date(policy.start_date), 'MMM dd, yyyy')} - {format(new Date(policy.end_date), 'MMM dd, yyyy')}
-                      </div>
-                    </div>
-                    <Badge variant={policy.status} size="sm">
-                      {policy.status}
-                    </Badge>
-                  </div>
-                  <div className="grid grid-cols-3 gap-4 text-sm">
-                    <div>
-                      <div className="text-slate-400">Premium</div>
-                      <div className="text-slate-100 font-semibold">₹{policy.weekly_premium}/week</div>
-                    </div>
-                    <div>
-                      <div className="text-slate-400">Coverage</div>
-                      <div className="text-slate-100 font-semibold">₹{policy.weekly_coverage_limit}/week</div>
-                    </div>
-                    <div>
-                      <div className="text-slate-400">Duration</div>
-                      <div className="text-slate-100 font-semibold">7 days</div>
-                    </div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="text-center py-8 text-slate-400">
-                No policies found
-              </div>
-            )}
-          </div>
-        </Card>
-      </div>
-    </div>
+          )}
+        </>
+      )}
+    </PageShell>
   );
 };

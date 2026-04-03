@@ -57,6 +57,14 @@ api.interceptors.response.use(
 // ============================================================================
 
 /**
+ * Login a worker by phone number
+ */
+export const loginWorker = async (phone: string): Promise<Worker> => {
+  const response = await api.post<Worker>(`/workers/login?phone=${encodeURIComponent(phone)}`);
+  return response.data;
+};
+
+/**
  * Register a new worker and get onboarding response with risk profile and plans
  */
 export const registerWorker = async (

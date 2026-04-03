@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import landingBgUrl from '../assets/images/Landing page.jpeg';
@@ -53,13 +53,7 @@ const ArrowRightIcon = () => (
 );
 
 /* ─── Navbar ─── */
-interface NavbarProps {
-  onJoin: () => void;
-  onAdmin: () => void;
-  scrollTo: (section: string) => void;
-}
-
-function Navbar({ onJoin, onAdmin, scrollTo }: NavbarProps) {
+function Navbar({ onJoin, onAdmin, onLogin }: { onJoin: () => void; onAdmin: () => void; onLogin: () => void }) {
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 24);
@@ -67,12 +61,7 @@ function Navbar({ onJoin, onAdmin, scrollTo }: NavbarProps) {
     return () => window.removeEventListener('scroll', fn);
   }, []);
 
-  const navLinks = [
-    { id: 'SwiftCover', label: 'SwiftCover' },
-    { id: 'HowItWorks', label: 'How It Works' },
-    { id: 'CoveragePlans', label: 'Coverage Plans' },
-    { id: 'FAQ', label: 'FAQ' }
-  ];
+  const navLinks = ['How It Works', 'Benefits', 'Coverage Plans', 'FAQ'];
 
   return (
     <nav style={{
@@ -81,8 +70,8 @@ function Navbar({ onJoin, onAdmin, scrollTo }: NavbarProps) {
     }}>
       <div style={{
         backdropFilter: scrolled ? 'blur(40px)' : 'none',
+        background: scrolled ? 'rgba(12,17,23,0.7)' : 'transparent',
         border: scrolled ? `1px solid rgba(255, 255, 255, 0.12)` : '1px solid transparent',
-        background: scrolled ? 'rgba(12, 17, 23, 0.4)' : 'transparent',
         borderRadius: 40,
         padding: '8px 12px',
         display: 'flex',
@@ -91,48 +80,59 @@ function Navbar({ onJoin, onAdmin, scrollTo }: NavbarProps) {
         gap: 24,
         transition: 'all 0.3s ease-in-out'
       }}>
-        {/* Left: Admin & Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16, paddingLeft: 8 }}>
-          <button onClick={onAdmin}
-            style={{ fontFamily: font.label, fontSize: 13, color: C.white, background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: 20, padding: '8px 16px', cursor: 'pointer' }}
-            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.25)')}
-            onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.15)')}
-          >
-            Admin
-          </button>
-          <div onClick={() => scrollTo('SwiftCover')} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-            <ShieldIcon />
-            <span style={{ fontFamily: font.display, fontWeight: 800, fontSize: 18, color: C.white, letterSpacing: '-0.01em' }}>SwiftCover</span>
-          </div>
+        {/* Logo */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingLeft: 8 }}>
+          <ShieldIcon />
+          <span style={{ fontFamily: font.display, fontWeight: 800, fontSize: 18, color: C.white, letterSpacing: '-0.01em' }}>SwiftCover</span>
         </div>
 
         {/* Center: Pills */}
-        <div style={{ display: 'flex', gap: 6 }}>
+        <div style={{ display: 'flex', gap: 4 }}>
           {navLinks.map((l) => (
-            <span key={l.id}
-              onClick={() => scrollTo(l.id)}
+            <span key={l}
               style={{
-                fontFamily: font.label, fontSize: 12, fontWeight: 500,
+                fontFamily: font.label, fontSize: 13, fontWeight: 500,
                 color: C.white,
                 background: 'rgba(255,255,255,0.08)',
                 borderRadius: 20,
-                padding: '8px 14px',
+                padding: '7px 14px',
                 cursor: 'pointer',
                 letterSpacing: '0.02em',
-                transition: 'all 0.2s',
-                whiteSpace: 'nowrap'
+                transition: 'all 0.2s'
               }}
-              onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.2)')}
-              onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.08)')}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.18)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; }}
             >
-              {l.label}
+              {l}
             </span>
           ))}
+        </div>
+
+        {/* Right: Admin, Login, CTA */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingRight: 4 }}>
+          <button onClick={onAdmin}
+            style={{ fontFamily: font.label, fontSize: 13, color: 'rgba(255,255,255,0.6)', background: 'none', border: 'none', padding: '7px 12px', cursor: 'pointer', borderRadius: 20, transition: 'all 0.2s' }}
+            onMouseEnter={e => { e.currentTarget.style.color = C.white; e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.6)'; e.currentTarget.style.background = 'none'; }}
+          >
+            Admin
+          </button>
+          <button onClick={onLogin}
+            style={{
+              fontFamily: font.label, fontWeight: 600, fontSize: 13, letterSpacing: '0.02em',
+              background: 'rgba(255,255,255,0.1)', color: C.white, border: '1px solid rgba(255,255,255,0.15)',
+              borderRadius: 20, padding: '7px 18px', cursor: 'pointer', transition: 'all 0.2s'
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.18)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
+          >
+            Login
+          </button>
           <button onClick={onJoin}
             style={{
-              fontFamily: font.label, fontWeight: 600, fontSize: 12, letterSpacing: '0.02em',
-              background: C.orange, color: C.white, border: 'none', borderRadius: 20, padding: '8px 18px', cursor: 'pointer',
-              marginLeft: 4, transition: 'all 0.2s', whiteSpace: 'nowrap'
+              fontFamily: font.label, fontWeight: 600, fontSize: 13, letterSpacing: '0.02em',
+              background: C.orange, color: C.white, border: 'none', borderRadius: 20, padding: '8px 20px', cursor: 'pointer',
+              transition: 'all 0.2s'
             }}
             onMouseEnter={e => (e.currentTarget.style.background = C.orangeHover)}
             onMouseLeave={e => (e.currentTarget.style.background = C.orange)}
@@ -179,7 +179,7 @@ function MiniChart() {
 }
 
 /* ─── Hero section ─── */
-function Hero({ onJoin, sectionRef }: { onJoin: () => void; sectionRef: React.RefObject<HTMLDivElement> }) {
+function Hero({ onJoin }: { onJoin: () => void }) {
   const features = [
     { icon: '⊙', label: 'Automatic Payouts', sub: 'No Claims Needed' },
     { icon: '◈', label: 'AI-Prediction Engine', sub: 'Income Forecasting' },
@@ -188,7 +188,7 @@ function Hero({ onJoin, sectionRef }: { onJoin: () => void; sectionRef: React.Re
   ];
 
   return (
-    <section ref={sectionRef} style={{ 
+    <section style={{ 
       paddingTop: 110, paddingBottom: 0, minHeight: '100vh', position: 'relative', overflow: 'hidden',
       backgroundImage: `url("${landingBgUrl}")`,
       backgroundSize: 'cover',
@@ -250,7 +250,7 @@ function Hero({ onJoin, sectionRef }: { onJoin: () => void; sectionRef: React.Re
     </section>
   );
 }
-function HowItWorks({ onJoin, sectionRef }: { onJoin: () => void; sectionRef: React.RefObject<HTMLDivElement> }) {
+function HowItWorks({ onJoin }: { onJoin: () => void }) {
   const steps = [
     { n: '01', title: 'Link Account', desc: 'Register with your phone, city, and platform details.' },
     { n: '02', title: 'Set Policy', desc: 'Choose Basic, Standard, or Premium. Coverage starts instantly.' },
@@ -259,51 +259,59 @@ function HowItWorks({ onJoin, sectionRef }: { onJoin: () => void; sectionRef: Re
   ];
 
   return (
-    <section ref={sectionRef} style={{ padding: '80px 40px', position: 'relative', zIndex: 10 }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: 60 }}>
-            <p style={{ fontFamily: font.label, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.orange, marginBottom: 10 }}>How It Works</p>
-            <h2 style={{ fontFamily: font.display, fontWeight: 800, fontSize: 36, color: C.white, letterSpacing: '-0.02em' }}>Four steps to complete protection.</h2>
-          </div>
+    <section style={{ padding: '80px 40px', position: 'relative', zIndex: 10 }}>
+      <div style={{ maxWidth: 1280, margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: 60 }}>
+          <p style={{ fontFamily: font.label, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.orange, marginBottom: 10 }}>How It Works</p>
+          <h2 style={{ fontFamily: font.display, fontWeight: 800, fontSize: 36, color: C.white, letterSpacing: '-0.02em' }}>Four steps to complete protection.</h2>
+        </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 0, position: 'relative' }}>
-            {/* connector line */}
-            <div style={{ position: 'absolute', top: 36, left: '12.5%', right: '12.5%', height: 1, background: C.border }} />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 0, position: 'relative' }}>
+          {/* connector line */}
+          <div style={{ position: 'absolute', top: 36, left: '12.5%', right: '12.5%', height: 1, background: C.border }} />
 
-            {steps.map((s, i) => (
-              <motion.div key={i}
-                initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
-                style={{ 
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', 
-                  padding: '32px 20px', 
-                  background: 'rgba(255, 255, 255, 0.03)', 
-                  backdropFilter: 'blur(16px)', 
-                  border: '1px solid rgba(255, 255, 255, 0.1)', 
-                  borderRadius: 16, 
-                  boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
-                  margin: '0 10px',
-                  position: 'relative',
-                  zIndex: 2
-                }}
-              >
-                <div style={{
-                  width: 64, height: 64, borderRadius: '50%', background: 'rgba(255,255,255,0.05)', border: `1px solid rgba(255,255,255,0.1)`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20,
-                }}>
-                  <span style={{ fontFamily: font.display, fontWeight: 900, fontSize: 22, color: i === 3 ? C.orange : C.white }}>{s.n}</span>
-                </div>
-                <h3 style={{ fontFamily: font.display, fontWeight: 700, fontSize: 18, color: C.white, marginBottom: 8 }}>{s.title}</h3>
-                <p style={{ fontFamily: font.body, fontSize: 14, color: C.muted, lineHeight: 1.7 }}>{s.desc}</p>
-              </motion.div>
-            ))}
-          </div>
+          {steps.map((s, i) => (
+            <motion.div key={i}
+              initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
+              style={{ 
+                display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', 
+                padding: '32px 20px', 
+                background: 'rgba(255, 255, 255, 0.03)', 
+                backdropFilter: 'blur(16px)', 
+                border: '1px solid rgba(255, 255, 255, 0.1)', 
+                borderRadius: 16, 
+                boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
+                margin: '0 10px',
+                position: 'relative',
+                zIndex: 2
+              }}
+            >
+              <div style={{
+                width: 64, height: 64, borderRadius: '50%', background: 'rgba(255,255,255,0.05)', border: `1px solid rgba(255,255,255,0.1)`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20,
+              }}>
+                <span style={{ fontFamily: font.display, fontWeight: 900, fontSize: 22, color: i === 3 ? C.orange : C.white }}>{s.n}</span>
+              </div>
+              <h3 style={{ fontFamily: font.display, fontWeight: 700, fontSize: 18, color: C.white, marginBottom: 8 }}>{s.title}</h3>
+              <p style={{ fontFamily: font.body, fontSize: 14, color: C.muted, lineHeight: 1.7 }}>{s.desc}</p>
+            </motion.div>
+          ))}
+        </div>
+
+        <div style={{ textAlign: 'center', marginTop: 48 }}>
+          <button onClick={onJoin}
+            style={{ fontFamily: font.display, fontWeight: 700, fontSize: 15, background: C.orange, color: C.white, border: 'none', borderRadius: 8, padding: '14px 40px', cursor: 'pointer' }}
+            onMouseEnter={e => (e.currentTarget.style.background = C.orangeHover)}
+            onMouseLeave={e => (e.currentTarget.style.background = C.orange)}
+          >Start Your Coverage</button>
+        </div>
       </div>
     </section>
   );
 }
 
 /* ─── Plans ─── */
-function Plans({ onJoin, sectionRef }: { onJoin: () => void; sectionRef: React.RefObject<HTMLDivElement> }) {
+function Plans({ onJoin }: { onJoin: () => void }) {
   const plans = [
     { name: 'Basic', price: '₹49', period: '/ week', max: '₹1,500', color: C.border, badge: null },
     { name: 'Standard', price: '₹89', period: '/ week', max: '₹2,500', color: C.orange, badge: 'Most Popular' },
@@ -317,7 +325,7 @@ function Plans({ onJoin, sectionRef }: { onJoin: () => void; sectionRef: React.R
   };
 
   return (
-    <section ref={sectionRef} style={{ padding: '80px 40px', position: 'relative', zIndex: 10 }}>
+    <section style={{ padding: '80px 40px', position: 'relative', zIndex: 10 }}>
       <div style={{ maxWidth: 1280, margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: 56 }}>
           <p style={{ fontFamily: font.label, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.orange, marginBottom: 10 }}>Coverage Plans</p>
@@ -377,38 +385,6 @@ function Plans({ onJoin, sectionRef }: { onJoin: () => void; sectionRef: React.R
               </motion.div>
             );
           })}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ─── FAQ ─── */
-function FAQ({ sectionRef }: { sectionRef: React.RefObject<HTMLDivElement> }) {
-  const faqs = [
-    { q: 'Is there a waiting period?', a: 'Coverage starts as soon as your first weekly premium is paid.' },
-    { q: 'How do I claim?', a: 'You don\'t! Our AI detects disruptions and initiates UPI payouts automatically.' },
-    { q: 'Which cities are covered?', a: 'Currently Hyderabad, Bangalore, Mumbai, Delhi, Chennai, and Pune.' },
-    { q: 'Can I cancel anytime?', a: 'Yes, just toggle off "Auto-Renew" in your dashboard.' }
-  ];
-
-  return (
-    <section ref={sectionRef} style={{ padding: '80px 40px', position: 'relative', zIndex: 10 }}>
-      <div style={{ maxWidth: 800, margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: 48 }}>
-          <p style={{ fontFamily: font.label, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: C.orange, marginBottom: 10 }}>FAQ</p>
-          <h2 style={{ fontFamily: font.display, fontWeight: 800, fontSize: 36, color: C.white, letterSpacing: '-0.02em' }}>Common Questions</h2>
-        </div>
-        <div style={{ display: 'grid', gap: 16 }}>
-          {faqs.map((f, i) => (
-            <div key={i} style={{ 
-              padding: '24px', background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(16px)', 
-              border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: 12 
-            }}>
-              <h3 style={{ fontFamily: font.display, fontWeight: 700, fontSize: 18, color: C.white, marginBottom: 8 }}>{f.q}</h3>
-              <p style={{ fontFamily: font.body, fontSize: 15, color: C.muted, lineHeight: 1.6 }}>{f.a}</p>
-            </div>
-          ))}
         </div>
       </div>
     </section>
@@ -487,30 +463,15 @@ function Footer({ onAdmin }: { onAdmin: () => void }) {
 export const Landing: React.FC = () => {
   const navigate = useNavigate();
   useFonts();
-  
-  const swiftRef = useRef<HTMLDivElement>(null);
-  const howRef = useRef<HTMLDivElement>(null);
-  const plansRef = useRef<HTMLDivElement>(null);
-  const faqRef = useRef<HTMLDivElement>(null);
-
-  const scrollTo = (id: string) => {
-    const refs: Record<string, React.RefObject<HTMLDivElement>> = {
-      SwiftCover: swiftRef,
-      HowItWorks: howRef,
-      CoveragePlans: plansRef,
-      FAQ: faqRef
-    };
-    refs[id]?.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
   const onJoin = () => navigate('/onboarding');
   const onAdmin = () => navigate('/admin');
-
+  const onLogin = () => navigate('/login');
   return (
     <div style={{ background: C.bg }}>
-      <Navbar onJoin={onJoin} onAdmin={onAdmin} scrollTo={scrollTo} />
-      <Hero onJoin={onJoin} sectionRef={swiftRef} />
+      <Navbar onJoin={onJoin} onAdmin={onAdmin} onLogin={onLogin} />
+      <Hero onJoin={onJoin} />
       
+      {/* Unified Background Wrapper to eliminate seams */}
       <div style={{ 
         position: 'relative', overflow: 'hidden',
         backgroundImage: `url("${howItWorksBgUrl}")`,
@@ -519,12 +480,13 @@ export const Landing: React.FC = () => {
         backgroundRepeat: 'no-repeat',
         backgroundAttachment: 'fixed'
       }}>
+        {/* Dark overlay for the entire bottom half of the page */}
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(12, 17, 23, 0.85) 0%, rgba(12, 17, 23, 0.4) 50%, rgba(12, 17, 23, 0.1) 100%)', pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.025) 1px, transparent 1px)', backgroundSize: '32px 32px', pointerEvents: 'none' }} />
 
-        <HowItWorks onJoin={onJoin} sectionRef={howRef} />
-        <Plans onJoin={onJoin} sectionRef={plansRef} />
-        <FAQ sectionRef={faqRef} />
+        {/* Sections sit on top completely transparently */}
+        <HowItWorks onJoin={onJoin} />
+        <Plans onJoin={onJoin} />
         <PartnersAndTestimonial />
         <Footer onAdmin={onAdmin} />
       </div>

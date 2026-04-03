@@ -1,0 +1,167 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+\usepackage{hyperref}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{color}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdftitle={Software Requirements Specification - SwiftCover},
+    pdfauthor={Engineering Team},
+}
+
+\title{\textbf{Software Requirements Specification (SRS)} \\ \vspace{0.5cm} \Large{SwiftCover: Q-Commerce Parametric Micro-Insurance}}
+\author{Prepared by: System Architecture \& Engineering Team}
+\date{\vspace{1cm} \today}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+\newpage
+
+\tableofcontents
+\newpage
+
+\section{Introduction}
+
+\subsection{Purpose}
+The purpose of this document is to outline the software requirements for \textbf{SwiftCover}, an AI-powered parametric micro-insurance platform designed exclusively for quick commerce (Q-Commerce) gig delivery workers in India (e.g., Zepto, Blinkit, Swiggy Instamart).
+
+\subsection{Scope}
+SwiftCover automatically detects external environmental disruptions (e.g., heavy rain, floods, heatwaves, extreme pollution, dark store closures) and evaluates their impact on delivery partners' earnings. Utilizing artificial intelligence models for expected income prediction and fraud detection, the system triggers automatic compensation directly via UPI without any manual claim filing by the end-users. Coverage is strictly constrained to \textbf{income loss}; health, vehicle, and accident covers are explicitly out of scope.
+
+\subsection{Definitions and Acronyms}
+\begin{itemize}[label=--]
+    \item \textbf{SRS:} Software Requirements Specification
+    \item \textbf{Q-Commerce:} Quick Commerce (sub-30-minute delivery services)
+    \item \textbf{Parametric Insurance:} A non-traditional insurance product that offers pre-specified payouts based upon a trigger event.
+    \item \textbf{UPI:} Unified Payments Interface
+    \item \textbf{AI/ML:} Artificial Intelligence / Machine Learning
+\end{itemize}
+
+\section{Overall Description}
+
+\subsection{Product Perspective}
+SwiftCover operates as an independent web-based application utilizing a modern Tech Stack (React frontend, FastAPI backend, PostgreSQL, and scikit-learn ML models). It interfaces via APIs to consume external environmental data, process parametric triggers, and simulate UPI bank transactions. 
+
+\subsection{User Personas}
+\begin{itemize}
+    \item \textbf{Primary User (Delivery Partner):} Relies purely on order volume for daily earnings. Extremely vulnerable to external disruptions. Utilizes the SwiftCover worker dashboard to manage policies, view 14-day earnings charts, and monitor real-time disruption alerts.
+    \item \textbf{Secondary User (Insurance Admin):} Oversees risk portfolios, queries platform analytics, utilizes the Disruption Simulator, and manually reviews flagged claims.
+\end{itemize}
+
+\subsection{Operating Environment}
+\begin{itemize}
+    \item \textbf{Backend:} Python 3.11+ / FastAPI / Uvicorn server.
+    \item \textbf{Frontend:} Node 18+ / React 18 / Vite / Tailwind CSS.
+    \item \textbf{Database:} PostgreSQL 14+.
+    \item \textbf{Deployment:} Containerized via Docker / Docker Compose.
+\end{itemize}
+
+\section{System Features \& Functional Requirements}
+
+\subsection{FR-1: Worker Registration \& Onboarding}
+\textbf{Description:} Secure registration workflow for Q-Commerce workers.\\
+\textbf{Requirements:}
+\begin{enumerate}
+    \item System shall collect name, unique phone number, city, primary dark store, operational zone, and platform identifier.
+    \item System shall leverage an AI model to evaluate an initial \textit{risk\_score} and output three tailored subscription options (Basic, Standard, Premium).
+    \item Coverage becomes active immediately post premium payment.
+\end{enumerate}
+
+\subsection{FR-2: Policy Management}
+\textbf{Description:} Strict 7-day policy lifecycle management.\\
+\textbf{Requirements:}
+\begin{enumerate}
+    \item System shall enforce exactly 7-day validity for all purchased policies.
+    \item Upgrades or renewals must be strictly sequential; an individual worker may only maintain one active policy concurrently.
+\end{enumerate}
+
+\subsection{FR-3: Parametric Claim Processing Engine}
+\textbf{Description:} Automated, AI-driven payout execution logic.\\
+\textbf{Requirements:}
+\begin{enumerate}
+    \item In the event of an active parametric trigger, system targets all covered workers locally.
+    \item System leverages a 14-day trailing history ML model to predict \textit{expected\_earnings}. Current day's \textit{actual\_earnings} are continuously polled.
+    \item Derived loss = $\max(0, expected\_earnings - actual\_earnings)$.
+    \item If calculated loss < \textcurrency 50, claim automatically rejected. Otherwise, triggers fraud detection engine.
+    \item \textbf{Constraint}: Batch processing must resolve claims for up to 10 workers in under 5.0 seconds.
+\end{enumerate}
+
+\subsection{FR-4: Administrative Disruption Simulator}
+\textbf{Description:} A back-office tool for simulating environmental triggers.\\
+\textbf{Requirements:}
+\begin{enumerate}
+    \item Admins construct test events choosing city, type, severity, and temporal duration.
+    \item Output displays synthetic payouts, fraud analysis score, and expected earnings deviations for mock data configurations.
+\end{enumerate}
+
+\subsection{FR-5 \& FR-6: Multi-Tenant Dashboards}
+\textbf{Requirements:}
+\begin{itemize}
+    \item \textbf{Worker Portal:} Must showcase real-time policy duration, historical tracking vs expected performance, and alert active disruptions localized to their zone.
+    \item \textbf{Admin Portal:} Must render aggregated KPIs (active policies, aggregate loss ratio, total active workers) and facilitate claim management for medium-confidence fraud flags.
+\end{itemize}
+
+\section{Parametric Coverage \& Fraud Rules (Non-Negotiable)}
+
+\subsection{Parametric Disruption Thresholds}
+\begin{table}[h]
+\centering
+\begin{tabularx}{\textwidth}{l X X X}
+\toprule
+\textbf{Disruption Type} & \textbf{Basic} & \textbf{Standard} & \textbf{Premium} \\
+\midrule
+Heavy Rain & 60 mm/hr & 50 mm/hr & 40 mm/hr \\
+Flood Status & 100 mm/hr & 100 mm/hr & 100 mm/hr \\
+Severe Pollution & AQI 250 & AQI 200 & AQI 180 \\
+Extreme Heat & N/A & 43$^{\circ}$C & 42$^{\circ}$C \\
+Traffic Shutdown & N/A & 7.0/10 Index & 6.5/10 Index \\
+Dark Store Closure & N/A & N/A & Covered \\
+Platform Outage & N/A & N/A & Covered \\
+\bottomrule
+\end{tabularx}
+\caption{Tiered Implementation corresponding to coverage layers.}
+\end{table}
+
+\subsection{Machine Learning AI Fraud Controls}
+Each claim generates a composite \textit{confidence score}. If normalized fraud score > 0.75, automated rejection is triggered. Between 0.40 and 0.75 prompts Administrator Review. < 0.40 triggers frictionless UPI payout.
+Factors analyzed:
+\begin{itemize}
+    \item Account maturity (Age < 7 Days yields +0.30 to risk).
+    \item Claim frequency (Approval quantity bounding).
+    \item Deviation bounds (Loss > 2.5X historical yields +0.35).
+    \item Geofencing compliance versus declared active zones.
+\end{itemize}
+
+\section{Non-Functional Requirements}
+
+\subsection{Performance}
+\begin{itemize}
+    \item Disruption engine parametric calculations must conclude $< 5s$ latency limits per subset cluster.
+    \item ML interference optimized locally with scikit-learn models natively loaded memory-side upon Uvicorn startup.
+\end{itemize}
+
+\subsection{Reliability and Resilience}
+\begin{itemize}
+    \item Automated handling of concurrent database commits utilizing SQLAlchemy transactions.
+    \item Platform maintains static fail-safes preventing overlapping policies spanning equivalent intervals.
+\end{itemize}
+
+\subsection{Extensibility \& Maintenance}
+\begin{itemize}
+    \item Strict decoupling mandated: React/Tailwind frontend segregated securely from the core FastApi execution environment. REST API utilized over CORS enabled bounds.
+    \item API strictly documented asynchronously via Swagger (openapi.json exposed intrinsically via FastApi.)
+\end{itemize}
+
+\end{document}

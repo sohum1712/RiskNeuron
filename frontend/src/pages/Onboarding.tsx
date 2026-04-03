@@ -9,9 +9,7 @@ import { registerWorker, createPolicy } from '../api/client';
 import { useStore } from '../store/useStore';
 import toast from 'react-hot-toast';
 import type { OnboardingResponse, PlanOption } from '../types';
-import onboardBgUrl from '../assets/images/Onboard.png.jpeg';
-
-
+import { AppBackground } from '../components/AppBackground';
 const cities = ['Hyderabad', 'Bangalore', 'Mumbai', 'Delhi', 'Chennai', 'Pune'];
 const platforms = [
   { value: 'zepto', label: 'Zepto', color: 'bg-yellow-500' },
@@ -132,23 +130,17 @@ export const Onboarding: React.FC = () => {
       minHeight: '100vh', 
       position: 'relative', 
       overflow: 'hidden', 
-      backgroundImage: `url("${onboardBgUrl}")`, 
-      backgroundSize: 'cover', 
-      backgroundPosition: 'center', 
-      backgroundRepeat: 'no-repeat', 
-      backgroundAttachment: 'fixed', 
       fontFamily: '"DM Sans", sans-serif',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'flex-end',
       padding: '40px'
     }}>
+     <AppBackground />
      <style>{`
        h1, h2, h3 { font-family: 'Barlow', sans-serif !important; }
        .font-label { font-family: 'Space Grotesk', sans-serif !important; }
      `}</style>
-     <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(12, 17, 23, 0.3) 0%, rgba(12, 17, 23, 0.7) 40%, rgba(12, 17, 23, 0.95) 100%)', pointerEvents: 'none' }} />
-     <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.025) 1px, transparent 1px)', backgroundSize: '32px 32px', pointerEvents: 'none' }} />
      <div className="w-full max-w-2xl relative z-10 mr-12 ml-auto">
         {/* Header */}
         <div className="text-left mb-8">
@@ -495,7 +487,7 @@ export const Onboarding: React.FC = () => {
           <div className="flex justify-between mt-6">
             <Button
               variant="ghost"
-              onClick={() => step > 1 ? setStep(step - 1) : navigate('/')}
+              onClick={() => step > 1 ? setStep(step - 1) : navigate('/login')}
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               {step > 1 ? 'Back' : 'Cancel'}

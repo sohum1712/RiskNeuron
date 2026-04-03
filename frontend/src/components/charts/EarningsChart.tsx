@@ -18,15 +18,19 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     const expected = payload[0]?.value || 0;
     const actual = payload[1]?.value || 0;
     const loss = Math.max(0, expected - actual);
-    
     return (
-      <div className="bg-slate-800 border border-slate-600 rounded-lg p-3 shadow-xl">
-        <p className="text-slate-300 text-sm font-medium mb-2">{label}</p>
-        <div className="space-y-1">
-          <p className="text-cyan-400 text-sm">Expected: ₹{expected.toFixed(0)}</p>
-          <p className="text-emerald-400 text-sm">Actual: ₹{actual.toFixed(0)}</p>
-          {loss > 0 && <p className="text-red-400 text-sm font-semibold">Loss: ₹{loss.toFixed(0)}</p>}
-        </div>
+      <div style={{
+        background: 'rgba(22,28,39,0.95)',
+        border: '1px solid rgba(255,255,255,0.10)',
+        borderRadius: 12,
+        padding: '12px 16px',
+        backdropFilter: 'blur(16px)',
+        fontFamily: "'DM Sans', sans-serif",
+      }}>
+        <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: 11, marginBottom: 8, fontFamily: "'Space Grotesk', sans-serif", letterSpacing: '0.05em' }}>{label}</p>
+        <p style={{ color: '#F97316', fontSize: 13, marginBottom: 3 }}>Expected: ₹{expected.toFixed(0)}</p>
+        <p style={{ color: '#22C55E', fontSize: 13, marginBottom: loss > 0 ? 3 : 0 }}>Actual: ₹{actual.toFixed(0)}</p>
+        {loss > 0 && <p style={{ color: '#EF4444', fontSize: 13, fontWeight: 700 }}>Loss: ₹{loss.toFixed(0)}</p>}
       </div>
     );
   }
@@ -41,24 +45,24 @@ export const EarningsChart: React.FC<EarningsChartProps> = ({ data }) => {
       <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
         <defs>
           <linearGradient id="colorExpected" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#06B6D4" stopOpacity={0.15} />
-            <stop offset="95%" stopColor="#06B6D4" stopOpacity={0} />
+            <stop offset="5%" stopColor="#F97316" stopOpacity={0.20} />
+            <stop offset="95%" stopColor="#F97316" stopOpacity={0} />
           </linearGradient>
           <linearGradient id="colorActual" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#10B981" stopOpacity={0.3} />
-            <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
+            <stop offset="5%" stopColor="#22C55E" stopOpacity={0.25} />
+            <stop offset="95%" stopColor="#22C55E" stopOpacity={0} />
           </linearGradient>
         </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
         <XAxis 
           dataKey="date" 
-          stroke="#94A3B8" 
-          tick={{ fill: '#94A3B8', fontSize: 12 }}
+          stroke="rgba(255,255,255,0.15)"
+          tick={{ fill: 'rgba(255,255,255,0.45)', fontSize: 11, fontFamily: "'Space Grotesk', sans-serif" }}
           tickFormatter={(value) => format(new Date(value), 'MMM dd')}
         />
         <YAxis 
-          stroke="#94A3B8" 
-          tick={{ fill: '#94A3B8', fontSize: 12 }}
+          stroke="rgba(255,255,255,0.15)"
+          tick={{ fill: 'rgba(255,255,255,0.45)', fontSize: 11, fontFamily: "'Space Grotesk', sans-serif" }}
           tickFormatter={(value) => `₹${value}`}
         />
         <Tooltip content={<CustomTooltip />} />
@@ -77,7 +81,7 @@ export const EarningsChart: React.FC<EarningsChartProps> = ({ data }) => {
         <Area
           type="monotone"
           dataKey="expected"
-          stroke="#06B6D4"
+          stroke="#F97316"
           strokeWidth={2}
           strokeDasharray="5 5"
           fill="url(#colorExpected)"
@@ -86,7 +90,7 @@ export const EarningsChart: React.FC<EarningsChartProps> = ({ data }) => {
         <Area
           type="monotone"
           dataKey="actual"
-          stroke="#10B981"
+          stroke="#22C55E"
           strokeWidth={2}
           fill="url(#colorActual)"
           name="Actual"

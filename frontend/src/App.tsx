@@ -1,41 +1,35 @@
-import React, { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import { useStore } from './store/useStore';
 
 // Pages
 import { Landing } from './pages/Landing';
 import { Onboarding } from './pages/Onboarding';
+import { Login } from './pages/Login';
 import { WorkerDashboard } from './pages/WorkerDashboard';
 import { PolicyPage } from './pages/PolicyPage';
 import { ClaimsPage } from './pages/ClaimsPage';
+import { ProfilePage } from './pages/ProfilePage';
 import { AdminDashboard } from './pages/AdminDashboard';
 
-// Root component that handles auto-redirect
+// Root component — shows landing page, no auto-redirect
+// Users can explicitly navigate to their dashboard via Login
 const Root: React.FC = () => {
-  const navigate = useNavigate();
-  const { currentWorkerId } = useStore();
-
-  useEffect(() => {
-    // If user has a stored worker ID, redirect to their dashboard
-    if (currentWorkerId) {
-      navigate(`/dashboard/${currentWorkerId}`);
-    }
-  }, [currentWorkerId, navigate]);
-
   return <Landing />;
 };
 
 function App() {
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-slate-900">
+      <div className="min-h-screen">
         <Routes>
           <Route path="/" element={<Root />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/dashboard/:workerId" element={<WorkerDashboard />} />
           <Route path="/policy/:workerId" element={<PolicyPage />} />
           <Route path="/claims/:workerId" element={<ClaimsPage />} />
+          <Route path="/profile/:workerId" element={<ProfilePage />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

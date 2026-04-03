@@ -1,22 +1,27 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Users, Shield, AlertTriangle, DollarSign, TrendingUp, 
-  Clock, Zap, Filter, ChevronDown, ChevronUp, Loader2
+import {
+  Users, Shield, AlertTriangle, DollarSign, TrendingUp,
+  Zap, ChevronDown, ChevronUp, Loader2, ArrowLeft
 } from 'lucide-react';
-import { 
-  AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
+import {
+  AreaChart, Area, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from 'recharts';
-import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
-import { Card } from '../components/ui/Card';
-import { Skeleton } from '../components/ui/Skeleton';
-import { getAnalytics, getAllClaims, simulateDisruption, getAllWorkers } from '../api/client';
+import { getAnalytics, getAllClaims, simulateDisruption } from '../api/client';
 import { format } from 'date-fns';
 import toast from 'react-hot-toast';
 import { showPayoutNotification } from '../components/PayoutNotification';
+import { AppBackground } from '../components/AppBackground';
+
+const font = {
+  display: "'Barlow', sans-serif",
+  body: "'DM Sans', sans-serif",
+  label: "'Space Grotesk', sans-serif",
+};
 
 const cities = ['Hyderabad', 'Bangalore', 'Mumbai', 'Delhi', 'Chennai', 'Pune'];
 const disruptionTypes = [
@@ -25,17 +30,22 @@ const disruptionTypes = [
   { value: 'extreme_heat', label: 'Extreme Heat', icon: '🌡️' },
   { value: 'severe_pollution', label: 'Pollution', icon: '🏭' },
   { value: 'traffic_shutdown', label: 'Traffic', icon: '🚦' },
-  { value: 'dark_store_closure', label: 'Dark Store Closure', icon: '🏪' },
+  { value: 'dark_store_closure', label: 'Dark Store', icon: '🏪' },
   { value: 'curfew', label: 'Curfew', icon: '🚫' },
-  { value: 'app_outage', label: 'App Outage', icon: '📱' }
+  { value: 'app_outage', label: 'App Outage', icon: '📱' },
 ];
 const severities = ['mild', 'moderate', 'severe', 'extreme'];
 
+const TABS = ['overview', 'claims', 'simulator', 'analytics'] as const;
+type Tab = typeof TABS[number];
+
 export const AdminDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'claims' | 'simulator' | 'analytics'>('overview');
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<Tab>('overview');
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [claimFilter, setClaimFilter] = useState<string>('all');
+  const [claimFilter, setClaimFilter] = useState('all');
   const [expandedClaim, setExpandedClaim] = useState<number | null>(null);
+  const [scrolled, setScrolled] = useState(false);
 
   // Simulator state
   const [simCity, setSimCity] = useState('Hyderabad');
@@ -47,62 +57,37 @@ export const AdminDashboard: React.FC = () => {
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
+    const fn = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', fn);
+    return () => { clearInterval(timer); window.removeEventListener('scroll', fn); };
   }, []);
 
   const { data: analytics, isLoading: analyticsLoading } = useQuery({
     queryKey: ['analytics'],
     queryFn: getAnalytics,
-    refetchInterval: 30000
+    refetchInterval: 30000,
   });
 
   const { data: claims, isLoading: claimsLoading, refetch: refetchClaims } = useQuery({
     queryKey: ['claims', claimFilter],
     queryFn: () => getAllClaims(claimFilter === 'all' ? undefined : claimFilter),
-    refetchInterval: 30000
+    refetchInterval: 30000,
   });
 
   const handleSimulate = async () => {
     setIsSimulating(true);
     setSimulationResult(null);
-
     try {
-      const params: any = {
-        city: simCity,
-        disruption_type: simDisruption,
-        severity: simSeverity,
-        duration_hours: simDuration
-      };
-
-      // Auto-fill metrics based on disruption type and severity
-      if (simDisruption === 'heavy_rain' || simDisruption === 'flood') {
-        params.rainfall_mm = simSeverity === 'extreme' ? 120 : simSeverity === 'severe' ? 95 : simSeverity === 'moderate' ? 65 : 45;
-      }
-      if (simDisruption === 'severe_pollution') {
-        params.aqi = simSeverity === 'extreme' ? 350 : simSeverity === 'severe' ? 280 : simSeverity === 'moderate' ? 220 : 180;
-      }
-      if (simDisruption === 'extreme_heat') {
-        params.temperature_celsius = simSeverity === 'extreme' ? 47 : simSeverity === 'severe' ? 44 : 42;
-      }
-      if (simDisruption === 'traffic_shutdown') {
-        params.traffic_index = simSeverity === 'extreme' ? 9.5 : simSeverity === 'severe' ? 8.5 : 7.5;
-      }
-
+      const params: any = { city: simCity, disruption_type: simDisruption, severity: simSeverity, duration_hours: simDuration };
+      if (simDisruption === 'heavy_rain' || simDisruption === 'flood') params.rainfall_mm = simSeverity === 'extreme' ? 120 : simSeverity === 'severe' ? 95 : simSeverity === 'moderate' ? 65 : 45;
+      if (simDisruption === 'severe_pollution') params.aqi = simSeverity === 'extreme' ? 350 : simSeverity === 'severe' ? 280 : simSeverity === 'moderate' ? 220 : 180;
+      if (simDisruption === 'extreme_heat') params.temperature_celsius = simSeverity === 'extreme' ? 47 : simSeverity === 'severe' ? 44 : 42;
+      if (simDisruption === 'traffic_shutdown') params.traffic_index = simSeverity === 'extreme' ? 9.5 : simSeverity === 'severe' ? 8.5 : 7.5;
       const result = await simulateDisruption(params);
       setSimulationResult(result);
-      
-      // Show payout notifications for approved claims
       result.claim_details.filter((c: any) => c.status === 'paid').forEach((claim: any, idx: number) => {
-        setTimeout(() => {
-          showPayoutNotification({
-            amount: claim.payout,
-            workerName: claim.worker_name,
-            disruptionType: claim.disruption_type || simDisruption,
-            upiReference: claim.upi_transaction_id || 'N/A'
-          });
-        }, idx * 1000);
+        setTimeout(() => showPayoutNotification({ amount: claim.payout, workerName: claim.worker_name, disruptionType: claim.disruption_type || simDisruption, upiReference: claim.upi_transaction_id || 'N/A' }), idx * 1000);
       });
-
       toast.success(`Processed ${result.claims_approved + result.claims_rejected + result.claims_fraud_flagged} claims in ${result.processing_time_seconds.toFixed(2)}s`);
       refetchClaims();
     } catch (error: any) {
@@ -112,778 +97,455 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
-  if (analyticsLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 py-8">
-        <div className="max-w-7xl mx-auto px-6">
-          <Skeleton variant="card" />
-        </div>
-      </div>
-    );
-  }
-
   const lossRatio = analytics ? (analytics.payouts_this_week / Math.max(analytics.premiums_this_week, 1)) * 100 : 0;
 
+  const kpis = [
+    { label: 'Total Workers', value: analytics?.total_workers || 0, icon: Users, color: '#F97316' },
+    { label: 'Active Policies', value: analytics?.active_policies || 0, icon: Shield, color: '#22C55E' },
+    { label: 'Claims This Week', value: analytics?.claims_this_week || 0, icon: AlertTriangle, color: '#F59E0B' },
+    { label: 'Payouts This Week', value: `₹${analytics?.payouts_this_week?.toFixed(0) || 0}`, icon: DollarSign, color: '#22C55E' },
+    { label: 'Loss Ratio', value: `${lossRatio.toFixed(1)}%`, icon: TrendingUp, color: lossRatio > 80 ? '#EF4444' : lossRatio > 60 ? '#F59E0B' : '#22C55E' },
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 py-8">
-      <div className="max-w-7xl mx-auto px-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-black text-slate-100">SwiftCover — Insurer Console</h1>
-            <p className="text-slate-400 mt-1">Real-time claims processing & risk management</p>
-          </div>
-          <div className="text-right">
-            <div className="text-sm text-slate-400">Current Time</div>
-            <div className="text-lg font-mono text-slate-100">
-              {format(currentTime, 'MMM dd, yyyy HH:mm:ss')}
+    <div className="relative min-h-screen text-white overflow-x-hidden" style={{ fontFamily: font.body }}>
+      <AppBackground />
+
+      {/* Nav */}
+      <nav className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ${scrolled ? 'py-3 bg-[#0C1117]/80 backdrop-blur-2xl border-b border-white/10 px-6 lg:px-12' : 'py-5 bg-transparent px-8 lg:px-16'}`}>
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button onClick={() => navigate('/')} className="p-2 hover:bg-white/5 rounded-xl border border-white/10 transition-all group" aria-label="Back to home">
+              <ArrowLeft className="w-4 h-4 text-white/40 group-hover:text-white group-hover:-translate-x-0.5 transition-all" />
+            </button>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-gradient-to-tr from-[#F97316] to-[#FB923C] rounded-lg flex items-center justify-center shadow-lg shadow-[#F97316]/30">
+                <Shield className="w-4 h-4 text-white" />
+              </div>
+              <span className="font-black text-base tracking-tighter" style={{ fontFamily: font.display }}>SWIFTCOVER</span>
+              <span className="text-[9px] font-black text-[#F97316] uppercase tracking-[0.2em] ml-2 px-2 py-0.5 bg-[#F97316]/10 rounded-md border border-[#F97316]/20" style={{ fontFamily: font.label }}>
+                Insurer Console
+              </span>
             </div>
           </div>
+          <div className="font-mono text-sm text-white/60">{format(currentTime, 'MMM dd, yyyy HH:mm:ss')}</div>
+        </div>
+      </nav>
+
+      <main className="pt-24 pb-20 px-6 lg:px-12 max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-10">
+          <p className="text-[10px] font-black text-[#F97316] uppercase tracking-[0.2em] mb-2" style={{ fontFamily: font.label }}>Admin</p>
+          <h1 className="text-4xl font-black tracking-tight" style={{ fontFamily: font.display }}>Insurer Console</h1>
+          <p className="text-white/60 text-sm mt-1">Real-time claims processing & risk management</p>
         </div>
 
-        {/* KPI Row */}
-        <div className="grid lg:grid-cols-5 gap-4 mb-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            <Card>
-              <div className="flex items-center gap-3">
-                <Users className="w-8 h-8 text-cyan-400" />
-                <div>
-                  <div className="text-sm text-slate-400">Total Workers</div>
-                  <div className="text-2xl font-bold text-slate-100">
-                    {analytics?.total_workers || 0}
-                  </div>
+        {/* KPI row */}
+        {analyticsLoading ? (
+          <div className="grid lg:grid-cols-5 gap-4 mb-8">
+            {[1,2,3,4,5].map(i => <div key={i} className="h-20 bg-white/[0.03] rounded-2xl animate-pulse" />)}
+          </div>
+        ) : (
+          <div className="grid lg:grid-cols-5 gap-4 mb-8">
+            {kpis.map((kpi, idx) => (
+              <motion.div key={kpi.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.08 }}
+                className="bg-white/[0.03] border border-white/[0.07] rounded-2xl p-4 flex items-center gap-3">
+                <div className="p-2 rounded-xl" style={{ backgroundColor: `${kpi.color}15` }}>
+                  <kpi.icon className="w-5 h-5" style={{ color: kpi.color }} />
                 </div>
-              </div>
-            </Card>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <Card>
-              <div className="flex items-center gap-3">
-                <Shield className="w-8 h-8 text-emerald-400" />
                 <div>
-                  <div className="text-sm text-slate-400">Active Policies</div>
-                  <div className="text-2xl font-bold text-slate-100">
-                    {analytics?.active_policies || 0}
-                  </div>
+                  <p className="text-[10px] font-black text-white/55 uppercase tracking-widest" style={{ fontFamily: font.label }}>{kpi.label}</p>
+                  <p className="text-xl font-black text-white" style={{ fontFamily: font.display, color: kpi.label === 'Loss Ratio' ? kpi.color : undefined }}>{kpi.value}</p>
                 </div>
-              </div>
-            </Card>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-          >
-            <Card>
-              <div className="flex items-center gap-3">
-                <AlertTriangle className="w-8 h-8 text-amber-400" />
-                <div>
-                  <div className="text-sm text-slate-400">Claims This Week</div>
-                  <div className="text-2xl font-bold text-slate-100">
-                    {analytics?.claims_this_week || 0}
-                  </div>
-                </div>
-              </div>
-            </Card>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-          >
-            <Card>
-              <div className="flex items-center gap-3">
-                <DollarSign className="w-8 h-8 text-emerald-400" />
-                <div>
-                  <div className="text-sm text-slate-400">Payouts This Week</div>
-                  <div className="text-2xl font-bold text-emerald-400">
-                    ₹{analytics?.payouts_this_week?.toFixed(0) || 0}
-                  </div>
-                </div>
-              </div>
-            </Card>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-          >
-            <Card>
-              <div className="flex items-center gap-3">
-                <TrendingUp className="w-8 h-8 text-cyan-400" />
-                <div>
-                  <div className="text-sm text-slate-400">Loss Ratio</div>
-                  <div className={`text-2xl font-bold ${
-                    lossRatio > 80 ? 'text-red-400' : lossRatio > 60 ? 'text-amber-400' : 'text-emerald-400'
-                  }`}>
-                    {lossRatio.toFixed(1)}%
-                  </div>
-                </div>
-              </div>
-            </Card>
-          </motion.div>
-        </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-6 border-b border-slate-700">
-          {['overview', 'claims', 'simulator', 'analytics'].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab as any)}
-              className={`px-6 py-3 font-semibold capitalize transition-all ${
-                activeTab === tab
-                  ? 'text-cyan-400 border-b-2 border-cyan-400'
-                  : 'text-slate-400 hover:text-slate-300'
+        <div className="flex gap-1 mb-8 bg-white/[0.03] border border-white/[0.07] rounded-2xl p-1 w-fit">
+          {TABS.map((tab) => (
+            <button key={tab} onClick={() => setActiveTab(tab)}
+              className={`px-5 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
+                activeTab === tab ? 'bg-[#F97316] text-white shadow-lg shadow-[#F97316]/20' : 'text-white/30 hover:text-white/60'
               }`}
+              style={{ fontFamily: font.label }}
             >
               {tab}
             </button>
           ))}
         </div>
 
-        {/* Tab Content */}
+        {/* Tab content */}
         <AnimatePresence mode="wait">
-          {activeTab === 'overview' && (
-            <OverviewTab analytics={analytics} />
-          )}
+          {activeTab === 'overview' && <OverviewTab key="overview" analytics={analytics} />}
           {activeTab === 'claims' && (
-            <ClaimsTab 
-              claims={claims} 
-              loading={claimsLoading}
-              filter={claimFilter}
-              setFilter={setClaimFilter}
-              expandedClaim={expandedClaim}
-              setExpandedClaim={setExpandedClaim}
-              refetch={refetchClaims}
-            />
+            <ClaimsTab key="claims" claims={claims} loading={claimsLoading} filter={claimFilter}
+              setFilter={setClaimFilter} expandedClaim={expandedClaim} setExpandedClaim={setExpandedClaim} refetch={refetchClaims} />
           )}
           {activeTab === 'simulator' && (
-            <SimulatorTab
-              city={simCity}
-              setCity={setSimCity}
-              disruption={simDisruption}
-              setDisruption={setSimDisruption}
-              severity={simSeverity}
-              setSeverity={setSimSeverity}
-              duration={simDuration}
-              setDuration={setSimDuration}
-              isSimulating={isSimulating}
-              result={simulationResult}
-              onSimulate={handleSimulate}
-            />
+            <SimulatorTab key="simulator" city={simCity} setCity={setSimCity} disruption={simDisruption}
+              setDisruption={setSimDisruption} severity={simSeverity} setSeverity={setSimSeverity}
+              duration={simDuration} setDuration={setSimDuration} isSimulating={isSimulating}
+              result={simulationResult} onSimulate={handleSimulate} />
           )}
-          {activeTab === 'analytics' && (
-            <AnalyticsTab analytics={analytics} />
-          )}
+          {activeTab === 'analytics' && <AnalyticsTab key="analytics" analytics={analytics} />}
         </AnimatePresence>
-      </div>
+      </main>
     </div>
   );
 };
 
-
-// Overview Tab Component
+// ─── Overview Tab ───────────────────────────────────────────────────────────
 const OverviewTab: React.FC<{ analytics: any }> = ({ analytics }) => {
   if (!analytics) return null;
-
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="space-y-6"
-    >
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Premiums vs Payouts Chart */}
-        <Card title="8-Week Trend" subtitle="Premiums vs Payouts">
-          <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={analytics.weekly_trend}>
-              <defs>
-                <linearGradient id="colorPremiums" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#06B6D4" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#06B6D4" stopOpacity={0} />
-                </linearGradient>
-                <linearGradient id="colorPayouts" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#EF4444" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#EF4444" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-              <XAxis dataKey="week" stroke="#94A3B8" tick={{ fill: '#94A3B8', fontSize: 12 }} />
-              <YAxis stroke="#94A3B8" tick={{ fill: '#94A3B8', fontSize: 12 }} tickFormatter={(v) => `₹${v}`} />
-              <Tooltip 
-                contentStyle={{ backgroundColor: '#1E293B', border: '1px solid #334155', borderRadius: '8px' }}
-                labelStyle={{ color: '#F8FAFC' }}
-              />
-              <Legend />
-              <Area type="monotone" dataKey="premiums" stroke="#06B6D4" fill="url(#colorPremiums)" name="Premiums" />
-              <Area type="monotone" dataKey="payouts" stroke="#EF4444" fill="url(#colorPayouts)" name="Payouts" />
-            </AreaChart>
-          </ResponsiveContainer>
-        </Card>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="grid lg:grid-cols-2 gap-6">
+      <div className="bg-white/[0.03] border border-white/[0.07] rounded-2xl p-6">
+        <p className="text-[10px] font-black text-white/55 uppercase tracking-[0.2em] mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>8-Week Trend</p>
+        <p className="text-xs text-white/55 mb-5">Premiums vs Payouts</p>
+        <ResponsiveContainer width="100%" height={280}>
+          <AreaChart data={analytics.weekly_trend}>
+            <defs>
+              <linearGradient id="gPremiums" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#F97316" stopOpacity={0.25} />
+                <stop offset="95%" stopColor="#F97316" stopOpacity={0} />
+              </linearGradient>
+              <linearGradient id="gPayouts" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#EF4444" stopOpacity={0.25} />
+                <stop offset="95%" stopColor="#EF4444" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+            <XAxis dataKey="week" stroke="rgba(255,255,255,0.2)" tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 11 }} />
+            <YAxis stroke="rgba(255,255,255,0.2)" tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 11 }} tickFormatter={(v) => `₹${v}`} />
+            <Tooltip contentStyle={{ backgroundColor: '#161C27', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', color: '#fff' }} />
+            <Legend wrapperStyle={{ color: 'rgba(255,255,255,0.4)', fontSize: 11 }} />
+            <Area type="monotone" dataKey="premiums" stroke="#F97316" fill="url(#gPremiums)" name="Premiums" strokeWidth={2} />
+            <Area type="monotone" dataKey="payouts" stroke="#EF4444" fill="url(#gPayouts)" name="Payouts" strokeWidth={2} />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
 
-        {/* City Stats */}
-        <Card title="City Breakdown" subtitle="Workers & Risk">
-          <div className="grid grid-cols-2 gap-3">
-            {analytics.city_stats.map((city: any) => (
-              <div key={city.city} className="bg-slate-900/50 rounded-lg p-3 border border-slate-700">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="font-semibold text-slate-100">{city.city}</div>
-                  <Badge variant={city.avg_risk_tier as any} size="sm">
-                    {city.avg_risk_tier}
-                  </Badge>
-                </div>
-                <div className="text-sm text-slate-400">
-                  {city.worker_count} workers • {city.claims_this_week} claims
-                </div>
+      <div className="bg-white/[0.03] border border-white/[0.07] rounded-2xl p-6">
+        <p className="text-[10px] font-black text-white/55 uppercase tracking-[0.2em] mb-5" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>City Breakdown</p>
+        <div className="grid grid-cols-2 gap-3">
+          {analytics.city_stats.map((city: any) => (
+            <div key={city.city} className="bg-white/[0.05] border border-white/[0.08] rounded-xl p-3">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-sm font-black text-white/80" style={{ fontFamily: "'Barlow', sans-serif" }}>{city.city}</span>
+                <Badge variant={city.avg_risk_tier as any} size="sm">{city.avg_risk_tier}</Badge>
               </div>
-            ))}
-          </div>
-        </Card>
+              <p className="text-xs text-white/55">{city.worker_count} workers · {city.claims_this_week} claims</p>
+            </div>
+          ))}
+        </div>
       </div>
     </motion.div>
   );
 };
 
-
-// Claims Tab Component
+// ─── Claims Tab ──────────────────────────────────────────────────────────────
 const ClaimsTab: React.FC<{
-  claims: any[];
-  loading: boolean;
-  filter: string;
-  setFilter: (f: string) => void;
-  expandedClaim: number | null;
-  setExpandedClaim: (id: number | null) => void;
-  refetch: () => void;
-}> = ({ claims, loading, filter, setFilter, expandedClaim, setExpandedClaim, refetch }) => {
+  claims: any[]; loading: boolean; filter: string; setFilter: (f: string) => void;
+  expandedClaim: number | null; setExpandedClaim: (id: number | null) => void; refetch: () => void;
+}> = ({ claims, loading, filter, setFilter, expandedClaim, setExpandedClaim }) => {
   const filters = ['all', 'pending', 'approved', 'paid', 'flagged_fraud'];
-
-  if (loading) return <Skeleton variant="card" />;
+  if (loading) return <div className="h-40 bg-white/[0.03] rounded-2xl animate-pulse" />;
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-    >
-      {/* Filter Buttons */}
-      <div className="flex gap-2 mb-6">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+      <div className="flex flex-wrap gap-2 mb-6">
         {filters.map((f) => (
-          <Button
-            key={f}
-            variant={filter === f ? 'primary' : 'ghost'}
-            size="sm"
-            onClick={() => setFilter(f)}
+          <button key={f} onClick={() => setFilter(f)}
+            className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${
+              filter === f ? 'bg-[#F97316]/10 border-[#F97316]/30 text-[#F97316]' : 'bg-white/[0.03] border-white/[0.07] text-white/30 hover:text-white/60'
+            }`}
+            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
           >
-            {f === 'flagged_fraud' && '🚨 '}
-            {f.replace(/_/g, ' ').toUpperCase()}
-          </Button>
+            {f === 'flagged_fraud' && '🚨 '}{f.replace(/_/g, ' ')}
+          </button>
         ))}
       </div>
 
-      {/* Claims Table */}
-      <Card>
+      <div className="bg-white/[0.03] border border-white/[0.07] rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-slate-700">
-                <th className="text-left py-3 px-4 text-sm font-semibold text-slate-400">ID</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-slate-400">Worker</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-slate-400">Zone</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-slate-400">Date</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-slate-400">Disruption</th>
-                <th className="text-right py-3 px-4 text-sm font-semibold text-slate-400">Loss</th>
-                <th className="text-right py-3 px-4 text-sm font-semibold text-slate-400">Payout</th>
-                <th className="text-center py-3 px-4 text-sm font-semibold text-slate-400">Fraud</th>
-                <th className="text-center py-3 px-4 text-sm font-semibold text-slate-400">Status</th>
-                <th className="text-center py-3 px-4 text-sm font-semibold text-slate-400"></th>
+              <tr className="border-b border-white/[0.07]">
+                {['ID', 'Worker', 'Zone', 'Date', 'Disruption', 'Loss', 'Payout', 'Fraud', 'Status', ''].map((h) => (
+                  <th key={h} className="text-left py-3 px-4 text-[10px] font-black text-white/55 uppercase tracking-widest" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{h}</th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              {claims && claims.length > 0 ? (
-                claims.map((claim: any) => (
-                  <React.Fragment key={claim.id}>
-                    <tr 
-                      className={`border-b border-slate-700 hover:bg-slate-800/50 cursor-pointer transition-colors ${
-                        claim.status === 'flagged_fraud' ? 'bg-red-500/5' : ''
-                      }`}
-                      onClick={() => setExpandedClaim(expandedClaim === claim.id ? null : claim.id)}
-                    >
-                      <td className="py-3 px-4 text-sm text-slate-300">#{claim.id}</td>
-                      <td className="py-3 px-4 text-sm text-slate-100">{claim.worker_name || 'N/A'}</td>
-                      <td className="py-3 px-4 text-sm text-slate-400">{claim.zone || 'N/A'}</td>
-                      <td className="py-3 px-4 text-sm text-slate-400">
-                        {format(new Date(claim.claim_date), 'MMM dd')}
-                      </td>
-                      <td className="py-3 px-4 text-sm text-slate-300">
-                        {claim.disruption_type?.replace(/_/g, ' ') || 'N/A'}
-                      </td>
-                      <td className="py-3 px-4 text-sm text-right text-red-400">
-                        ₹{claim.income_loss?.toFixed(0) || 0}
-                      </td>
-                      <td className="py-3 px-4 text-sm text-right text-emerald-400 font-semibold">
-                        ₹{claim.payout_amount?.toFixed(0) || 0}
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        <div className="flex items-center justify-center">
-                          <div className="w-20 bg-slate-700 rounded-full h-2">
-                            <div 
-                              className={`h-2 rounded-full ${
-                                claim.fraud_score > 0.75 ? 'bg-red-500' :
-                                claim.fraud_score > 0.40 ? 'bg-amber-500' :
-                                'bg-emerald-500'
-                              }`}
-                              style={{ width: `${claim.fraud_score * 100}%` }}
-                            />
-                          </div>
-                          <span className="ml-2 text-xs text-slate-400">
-                            {Math.round(claim.fraud_score * 100)}
-                          </span>
+              {claims && claims.length > 0 ? claims.map((claim: any) => (
+                <React.Fragment key={claim.id}>
+                  <tr
+                    className={`border-b border-white/[0.05] hover:bg-white/[0.03] cursor-pointer transition-colors ${claim.status === 'flagged_fraud' ? 'bg-red-500/[0.03]' : ''}`}
+                    onClick={() => setExpandedClaim(expandedClaim === claim.id ? null : claim.id)}
+                  >
+                    <td className="py-3 px-4 text-xs text-white/55">#{claim.id}</td>
+                    <td className="py-3 px-4 text-sm font-bold text-white/85">{claim.worker_name || 'N/A'}</td>
+                    <td className="py-3 px-4 text-xs text-white/55">{claim.zone || 'N/A'}</td>
+                    <td className="py-3 px-4 text-xs text-white/55">{format(new Date(claim.claim_date), 'MMM dd')}</td>
+                    <td className="py-3 px-4 text-xs text-white/70">{claim.disruption_type?.replace(/_/g, ' ') || 'N/A'}</td>
+                    <td className="py-3 px-4 text-xs text-right text-red-400">₹{claim.income_loss?.toFixed(0) || 0}</td>
+                    <td className="py-3 px-4 text-sm text-right font-black text-[#22C55E]">₹{claim.payout_amount?.toFixed(0) || 0}</td>
+                    <td className="py-3 px-4">
+                      <div className="flex items-center gap-2">
+                        <div className="w-16 bg-white/5 rounded-full h-1.5">
+                          <div className={`h-1.5 rounded-full ${claim.fraud_score > 0.75 ? 'bg-red-500' : claim.fraud_score > 0.40 ? 'bg-amber-500' : 'bg-[#22C55E]'}`}
+                            style={{ width: `${claim.fraud_score * 100}%` }} />
                         </div>
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        <Badge variant={claim.status} size="sm">
-                          {claim.status}
-                        </Badge>
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        {expandedClaim === claim.id ? (
-                          <ChevronUp className="w-4 h-4 text-slate-400" />
-                        ) : (
-                          <ChevronDown className="w-4 h-4 text-slate-400" />
+                        <span className="text-[10px] text-white/55">{Math.round(claim.fraud_score * 100)}</span>
+                      </div>
+                    </td>
+                    <td className="py-3 px-4"><Badge variant={claim.status as any} size="sm">{claim.status}</Badge></td>
+                    <td className="py-3 px-4 text-center">
+                      {expandedClaim === claim.id ? <ChevronUp className="w-4 h-4 text-white/20" /> : <ChevronDown className="w-4 h-4 text-white/20" />}
+                    </td>
+                  </tr>
+                  {expandedClaim === claim.id && (
+                    <tr>
+                      <td colSpan={10} className="bg-white/[0.02] px-6 py-4">
+                        <div className="grid grid-cols-3 gap-4 mb-3">
+                          {[
+                            { label: 'Expected', value: `₹${claim.expected_earnings?.toFixed(0) || 0}` },
+                            { label: 'Actual', value: `₹${claim.actual_earnings?.toFixed(0) || 0}` },
+                            { label: 'Income Loss', value: `₹${claim.income_loss?.toFixed(0) || 0}`, red: true },
+                          ].map((s) => (
+                            <div key={s.label}>
+                              <p className="text-[10px] text-white/55 uppercase tracking-widest mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>{s.label}</p>
+                              <p className={`text-lg font-black ${s.red ? 'text-red-400' : 'text-white/70'}`} style={{ fontFamily: "'Barlow', sans-serif" }}>{s.value}</p>
+                            </div>
+                          ))}
+                        </div>
+                        {claim.fraud_flags?.length > 0 && (
+                          <div className="space-y-1">
+                            {claim.fraud_flags.map((flag: string, i: number) => (
+                              <p key={i} className="text-xs text-red-400">⚑ {flag}</p>
+                            ))}
+                          </div>
                         )}
                       </td>
                     </tr>
-                    {expandedClaim === claim.id && (
-                      <tr>
-                        <td colSpan={10} className="bg-slate-900/50 p-4">
-                          <div className="grid grid-cols-3 gap-4 mb-4">
-                            <div>
-                              <div className="text-xs text-slate-400 mb-1">Expected Earnings</div>
-                              <div className="text-lg font-semibold text-slate-100">
-                                ₹{claim.expected_earnings?.toFixed(0) || 0}
-                              </div>
-                            </div>
-                            <div>
-                              <div className="text-xs text-slate-400 mb-1">Actual Earnings</div>
-                              <div className="text-lg font-semibold text-slate-100">
-                                ₹{claim.actual_earnings?.toFixed(0) || 0}
-                              </div>
-                            </div>
-                            <div>
-                              <div className="text-xs text-slate-400 mb-1">Income Loss</div>
-                              <div className="text-lg font-semibold text-red-400">
-                                ₹{claim.income_loss?.toFixed(0) || 0}
-                              </div>
-                            </div>
-                          </div>
-                          {claim.fraud_flags && claim.fraud_flags.length > 0 && (
-                            <div>
-                              <div className="text-xs text-slate-400 mb-2">Fraud Flags:</div>
-                              <div className="space-y-1">
-                                {claim.fraud_flags.map((flag: string, idx: number) => (
-                                  <div key={idx} className="text-sm text-red-400">⚑ {flag}</div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </td>
-                      </tr>
-                    )}
-                  </React.Fragment>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={10} className="py-8 text-center text-slate-400">
-                    No claims found
-                  </td>
-                </tr>
+                  )}
+                </React.Fragment>
+              )) : (
+                <tr><td colSpan={10} className="py-12 text-center text-white/55 text-sm">No claims found</td></tr>
               )}
             </tbody>
           </table>
         </div>
-      </Card>
+      </div>
     </motion.div>
   );
 };
 
-
-// Simulator Tab Component - THE KEY DEMO FEATURE
+// ─── Simulator Tab ───────────────────────────────────────────────────────────
 const SimulatorTab: React.FC<{
-  city: string;
-  setCity: (c: string) => void;
-  disruption: string;
-  setDisruption: (d: string) => void;
-  severity: string;
-  setSeverity: (s: string) => void;
-  duration: number;
-  setDuration: (d: number) => void;
-  isSimulating: boolean;
-  result: any;
-  onSimulate: () => void;
+  city: string; setCity: (c: string) => void;
+  disruption: string; setDisruption: (d: string) => void;
+  severity: string; setSeverity: (s: string) => void;
+  duration: number; setDuration: (d: number) => void;
+  isSimulating: boolean; result: any; onSimulate: () => void;
 }> = ({ city, setCity, disruption, setDisruption, severity, setSeverity, duration, setDuration, isSimulating, result, onSimulate }) => {
-  
   const getMetricPreview = () => {
-    if (disruption === 'heavy_rain' || disruption === 'flood') {
-      const rainfall = severity === 'extreme' ? 120 : severity === 'severe' ? 95 : severity === 'moderate' ? 65 : 45;
-      return `Rainfall: ${rainfall}mm`;
-    }
-    if (disruption === 'severe_pollution') {
-      const aqi = severity === 'extreme' ? 350 : severity === 'severe' ? 280 : severity === 'moderate' ? 220 : 180;
-      return `AQI: ${aqi}`;
-    }
-    if (disruption === 'extreme_heat') {
-      const temp = severity === 'extreme' ? 47 : severity === 'severe' ? 44 : 42;
-      return `Temperature: ${temp}°C`;
-    }
-    if (disruption === 'traffic_shutdown') {
-      const traffic = severity === 'extreme' ? 9.5 : severity === 'severe' ? 8.5 : 7.5;
-      return `Traffic Index: ${traffic}/10`;
-    }
+    if (disruption === 'heavy_rain' || disruption === 'flood') return `Rainfall: ${severity === 'extreme' ? 120 : severity === 'severe' ? 95 : severity === 'moderate' ? 65 : 45}mm`;
+    if (disruption === 'severe_pollution') return `AQI: ${severity === 'extreme' ? 350 : severity === 'severe' ? 280 : severity === 'moderate' ? 220 : 180}`;
+    if (disruption === 'extreme_heat') return `Temperature: ${severity === 'extreme' ? 47 : severity === 'severe' ? 44 : 42}°C`;
+    if (disruption === 'traffic_shutdown') return `Traffic Index: ${severity === 'extreme' ? 9.5 : severity === 'severe' ? 8.5 : 7.5}/10`;
     return 'Metrics auto-filled';
   };
 
+  const selectClass = "w-full bg-white/[0.03] border border-white/[0.07] rounded-xl px-4 py-3 text-white/70 text-sm focus:outline-none focus:border-[#F97316]/50 transition-all";
+
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="grid lg:grid-cols-2 gap-6"
-    >
-      {/* Left Panel - Configuration */}
-      <Card title="Disruption Configuration" subtitle="Configure and trigger a disruption event">
-        <div className="space-y-6">
-          {/* City */}
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">City</label>
-            <select
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-slate-100 focus:outline-none focus:border-cyan-500"
-            >
-              {cities.map(c => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Disruption Type */}
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-3">Disruption Type</label>
-            <div className="grid grid-cols-4 gap-2">
-              {disruptionTypes.map((dt) => (
-                <button
-                  key={dt.value}
-                  onClick={() => setDisruption(dt.value)}
-                  className={`p-3 rounded-lg border transition-all ${
-                    disruption === dt.value
-                      ? 'border-cyan-500 bg-cyan-500/10'
-                      : 'border-slate-600 bg-slate-900 hover:border-slate-500'
-                  }`}
-                >
-                  <div className="text-2xl mb-1">{dt.icon}</div>
-                  <div className="text-xs text-slate-300">{dt.label}</div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Severity */}
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-3">Severity</label>
-            <div className="flex gap-2">
-              {severities.map((s) => (
-                <button
-                  key={s}
-                  onClick={() => setSeverity(s)}
-                  className={`flex-1 py-2 rounded-lg border font-medium capitalize transition-all ${
-                    severity === s
-                      ? 'border-cyan-500 bg-cyan-500/10 text-cyan-400'
-                      : 'border-slate-600 bg-slate-900 text-slate-400 hover:border-slate-500'
-                  }`}
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Duration */}
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Duration: {duration} hours
-            </label>
-            <input
-              type="range"
-              min="1"
-              max="24"
-              value={duration}
-              onChange={(e) => setDuration(parseInt(e.target.value))}
-              className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-cyan-500"
-            />
-            <div className="flex justify-between text-xs text-slate-400 mt-1">
-              <span>1h</span>
-              <span>24h</span>
-            </div>
-          </div>
-
-          {/* Metric Preview */}
-          <div className="bg-slate-900 border border-slate-600 rounded-lg p-4">
-            <div className="text-sm text-slate-400 mb-1">Auto-filled Metrics</div>
-            <div className="text-lg font-semibold text-cyan-400">{getMetricPreview()}</div>
-          </div>
-
-          {/* Trigger Button */}
-          <Button
-            variant="danger"
-            size="lg"
-            onClick={onSimulate}
-            loading={isSimulating}
-            disabled={isSimulating}
-            className="w-full"
-          >
-            <Zap className="w-5 h-5 mr-2" />
-            TRIGGER DISRUPTION
-          </Button>
-          <p className="text-sm text-slate-400 text-center">
-            Evaluates all active policies in {city}
-          </p>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="grid lg:grid-cols-2 gap-6">
+      {/* Config panel */}
+      <div className="bg-white/[0.03] border border-white/[0.07] rounded-2xl p-6 space-y-6">
+        <div>
+          <p className="text-[10px] font-black text-white/55 uppercase tracking-[0.2em] mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Disruption Simulator</p>
+          <p className="text-xs text-white/55">Configure and trigger a disruption event</p>
         </div>
-      </Card>
 
-      {/* Right Panel - Live Feed */}
-      <Card title="Live Processing Feed" subtitle="Real-time claim evaluation results">
-        <div className="bg-slate-900 rounded-lg p-4 font-mono text-sm min-h-[600px] max-h-[600px] overflow-y-auto">
+        <div>
+          <label className="block text-xs font-bold text-white/65 mb-2">City</label>
+          <select value={city} onChange={(e) => setCity(e.target.value)} className={selectClass}>
+            {cities.map(c => <option key={c} value={c} className="bg-[#161C27]">{c}</option>)}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold text-white/65 mb-3">Disruption Type</label>
+          <div className="grid grid-cols-4 gap-2">
+            {disruptionTypes.map((dt) => (
+              <button key={dt.value} onClick={() => setDisruption(dt.value)}
+                className={`p-3 rounded-xl border transition-all text-center ${disruption === dt.value ? 'border-[#F97316]/40 bg-[#F97316]/10' : 'border-white/[0.07] bg-white/[0.02] hover:border-white/20'}`}>
+                <div className="text-xl mb-1">{dt.icon}</div>
+                <div className="text-[9px] text-white/40 font-bold">{dt.label}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold text-white/65 mb-3">Severity</label>
+          <div className="flex gap-2">
+            {severities.map((s) => (
+              <button key={s} onClick={() => setSeverity(s)}
+                className={`flex-1 py-2 rounded-xl border text-xs font-black capitalize transition-all ${severity === s ? 'border-[#F97316]/40 bg-[#F97316]/10 text-[#F97316]' : 'border-white/[0.07] text-white/30 hover:border-white/20'}`}
+                style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                {s}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold text-white/65 mb-2">Duration: {duration}h</label>
+          <input type="range" min="1" max="24" value={duration} onChange={(e) => setDuration(parseInt(e.target.value))}
+            className="w-full h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer accent-[#F97316]" />
+          <div className="flex justify-between text-[10px] text-white/45 mt-1">
+            <span>1h</span><span>24h</span>
+          </div>
+        </div>
+
+        <div className="p-4 bg-white/[0.02] border border-white/[0.05] rounded-xl">
+          <p className="text-[10px] text-white/55 uppercase tracking-widest mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Auto-filled Metrics</p>
+          <p className="text-base font-black text-[#F97316]" style={{ fontFamily: "'Barlow', sans-serif" }}>{getMetricPreview()}</p>
+        </div>
+
+        <button onClick={onSimulate} disabled={isSimulating}
+          className="w-full flex items-center justify-center gap-2 py-3 bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white rounded-xl text-sm font-black transition-all shadow-lg shadow-red-500/20"
+          style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+          {isSimulating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+          {isSimulating ? 'Processing...' : 'TRIGGER DISRUPTION'}
+        </button>
+        <p className="text-[10px] text-white/45 text-center">Evaluates all active policies in {city}</p>
+      </div>
+
+      {/* Live feed */}
+      <div className="bg-white/[0.03] border border-white/[0.07] rounded-2xl p-6">
+        <p className="text-[10px] font-black text-white/55 uppercase tracking-[0.2em] mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Live Processing Feed</p>
+        <p className="text-xs text-white/55 mb-5">Real-time claim evaluation results</p>
+        <div className="bg-[#0C1117]/60 rounded-xl p-4 font-mono text-sm min-h-[500px] max-h-[500px] overflow-y-auto border border-white/[0.05]">
           {!result && !isSimulating && (
-            <div className="text-slate-500 text-center py-20">
-              Configure a disruption and click Trigger
-            </div>
+            <p className="text-white/45 text-center py-20 text-xs">Configure a disruption and click Trigger</p>
           )}
-
           {isSimulating && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-cyan-400 flex items-center gap-2"
-            >
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
-              >
-                <Loader2 className="w-4 h-4" />
-              </motion.div>
-              Processing claims...
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2 text-[#F97316]">
+              <Loader2 className="w-4 h-4 animate-spin" /> Processing claims...
             </motion.div>
           )}
-
           {result && !isSimulating && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="space-y-2"
-            >
-              <div className="text-slate-400">── DISRUPTION TRIGGERED ─────────────────</div>
-              <div className="text-slate-100">
-                📍 {result.disruption_event.city} — {result.disruption_event.disruption_type.replace(/_/g, ' ')} ({result.disruption_event.severity})
-              </div>
-              <div className="text-slate-400">
-                ⏱️ {format(new Date(result.disruption_event.started_at), 'MMM dd, yyyy HH:mm:ss')}
-              </div>
-              <div className="text-slate-400">─────────────────────────────────────────</div>
-              <div className="text-cyan-400">
-                Scanning active policies... {result.policies_evaluated} found
-              </div>
-              <div className="text-slate-400">─────────────────────────────────────────</div>
-
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-2 text-xs">
+              <p className="text-white/30">── DISRUPTION TRIGGERED ──────────────</p>
+              <p className="text-white/70">📍 {result.disruption_event.city} — {result.disruption_event.disruption_type.replace(/_/g, ' ')} ({result.disruption_event.severity})</p>
+              <p className="text-white/30">⏱️ {format(new Date(result.disruption_event.started_at), 'MMM dd, yyyy HH:mm:ss')}</p>
+              <p className="text-white/30">─────────────────────────────────────</p>
+              <p className="text-[#F97316]">Scanning active policies... {result.policies_evaluated} found</p>
+              <p className="text-white/30">─────────────────────────────────────</p>
               {result.claim_details.map((claim: any, idx: number) => (
-                <motion.div
-                  key={idx}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: idx * 0.2 }}
-                  className="my-3"
-                >
+                <motion.div key={idx} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.15 }} className="my-2">
                   {claim.status === 'paid' || claim.status === 'approved' ? (
                     <>
-                      <div className="text-emerald-400">
-                        ✅ {claim.worker_name} ({claim.platform} · {claim.zone})
-                      </div>
-                      <div className="text-slate-300 ml-4">
-                        Expected: ₹{claim.expected_earnings?.toFixed(0)} | Actual: ₹{claim.actual_earnings?.toFixed(0)} | Loss: ₹{(claim.expected_earnings - claim.actual_earnings).toFixed(0)}
-                      </div>
-                      <div className="text-slate-400 ml-4">
-                        Fraud: CLEAR (score: {(claim.fraud_score || 0).toFixed(2)})
-                      </div>
-                      <div className="text-emerald-400 ml-4">
-                        → APPROVED | ₹{claim.payout}
-                      </div>
-                      {claim.upi_transaction_id && (
-                        <div className="text-slate-400 ml-4">
-                          → UPI: {claim.upi_transaction_id}
-                        </div>
-                      )}
+                      <p className="text-[#22C55E]">✅ {claim.worker_name} ({claim.platform} · {claim.zone})</p>
+                      <p className="text-white/40 ml-4">Expected: ₹{claim.expected_earnings?.toFixed(0)} | Actual: ₹{claim.actual_earnings?.toFixed(0)}</p>
+                      <p className="text-[#22C55E] ml-4">→ APPROVED | ₹{claim.payout}</p>
+                      {claim.upi_transaction_id && <p className="text-white/30 ml-4">→ UPI: {claim.upi_transaction_id}</p>}
                     </>
                   ) : (
                     <>
-                      <div className="text-amber-400">
-                        ⚠️ {claim.worker_name} ({claim.platform} · {claim.zone})
-                      </div>
-                      <div className="text-slate-300 ml-4">
-                        Expected: ₹{claim.expected_earnings?.toFixed(0)} | Actual: ₹{claim.actual_earnings?.toFixed(0)} | Loss: ₹{(claim.expected_earnings - claim.actual_earnings).toFixed(0)}
-                      </div>
-                      <div className="text-red-400 ml-4">
-                        Fraud: FLAGS DETECTED
-                      </div>
-                      {claim.fraud_flags && claim.fraud_flags.map((flag: string, i: number) => (
-                        <div key={i} className="text-red-400 ml-4">⚑ {flag}</div>
-                      ))}
-                      <div className="text-amber-400 ml-4">
-                        → FLAGGED FOR REVIEW | Payout: ₹0 (held)
-                      </div>
+                      <p className="text-amber-400">⚠️ {claim.worker_name} ({claim.platform} · {claim.zone})</p>
+                      <p className="text-red-400 ml-4">Fraud: FLAGS DETECTED</p>
+                      {claim.fraud_flags?.map((flag: string, i: number) => <p key={i} className="text-red-400 ml-4">⚑ {flag}</p>)}
+                      <p className="text-amber-400 ml-4">→ FLAGGED FOR REVIEW | Payout: ₹0 (held)</p>
                     </>
                   )}
                 </motion.div>
               ))}
-
-              <div className="text-slate-400 mt-4">─────────────────────────────────────────</div>
-              <div className="text-cyan-400">
-                PROCESSING COMPLETE ({result.processing_time_seconds.toFixed(2)}s)
-              </div>
-              <div className="text-emerald-400">
-                Approved: {result.claims_approved} ✅ | Flagged: {result.claims_fraud_flagged} ⚠️
-              </div>
-              <div className="text-slate-100">
-                Total Payout: ₹{result.total_payout.toFixed(0)}
-              </div>
-              {result.claims_fraud_flagged > 0 && (
-                <div className="text-amber-400">
-                  Fraud Saved: ₹{(result.claim_details
-                    .filter((c: any) => c.status === 'flagged_fraud')
-                    .reduce((sum: number, c: any) => sum + (c.expected_earnings - c.actual_earnings), 0)
-                  ).toFixed(0)}
-                </div>
-              )}
-              <div className="text-slate-400">─────────────────────────────────────────</div>
+              <p className="text-white/30">─────────────────────────────────────</p>
+              <p className="text-[#F97316]">COMPLETE ({result.processing_time_seconds.toFixed(2)}s)</p>
+              <p className="text-[#22C55E]">Approved: {result.claims_approved} ✅ | Flagged: {result.claims_fraud_flagged} ⚠️</p>
+              <p className="text-white/70">Total Payout: ₹{result.total_payout.toFixed(0)}</p>
             </motion.div>
           )}
         </div>
-      </Card>
+      </div>
     </motion.div>
   );
 };
 
-
-// Analytics Tab Component
+// ─── Analytics Tab ───────────────────────────────────────────────────────────
 const AnalyticsTab: React.FC<{ analytics: any }> = ({ analytics }) => {
   if (!analytics) return null;
-
   const claimStatusData = [
-    { name: 'Approved', value: analytics.claims_this_week * 0.6, color: '#06B6D4' },
-    { name: 'Rejected', value: analytics.claims_this_week * 0.2, color: '#64748B' },
-    { name: 'Flagged', value: analytics.claims_this_week * 0.2, color: '#EF4444' }
+    { name: 'Approved', value: Math.round(analytics.claims_this_week * 0.6), color: '#F97316' },
+    { name: 'Rejected', value: Math.round(analytics.claims_this_week * 0.2), color: '#475569' },
+    { name: 'Flagged', value: Math.round(analytics.claims_this_week * 0.2), color: '#EF4444' },
   ];
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="space-y-6"
-    >
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6">
       <div className="grid lg:grid-cols-3 gap-6">
-        {/* Claims Status Donut */}
-        <Card title="Claims Status" subtitle="This week">
-          <ResponsiveContainer width="100%" height={250}>
+        <div className="bg-white/[0.03] border border-white/[0.07] rounded-2xl p-6">
+          <p className="text-[10px] font-black text-white/55 uppercase tracking-[0.2em] mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Claims Status</p>
+          <p className="text-xs text-white/55 mb-4">This week</p>
+          <ResponsiveContainer width="100%" height={220}>
             <PieChart>
-              <Pie
-                data={claimStatusData}
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={90}
-                paddingAngle={5}
-                dataKey="value"
-              >
-                {claimStatusData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
+              <Pie data={claimStatusData} cx="50%" cy="50%" innerRadius={55} outerRadius={85} paddingAngle={4} dataKey="value">
+                {claimStatusData.map((entry, index) => <Cell key={index} fill={entry.color} />)}
               </Pie>
-              <Tooltip 
-                contentStyle={{ backgroundColor: '#1E293B', border: '1px solid #334155', borderRadius: '8px' }}
-              />
-              <Legend />
+              <Tooltip contentStyle={{ backgroundColor: '#161C27', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', color: '#fff' }} />
+              <Legend wrapperStyle={{ color: 'rgba(255,255,255,0.4)', fontSize: 11 }} />
             </PieChart>
           </ResponsiveContainer>
-        </Card>
+        </div>
 
-        {/* Loss Ratio Trend */}
-        <Card title="Loss Ratio Trend" subtitle="8 weeks" className="lg:col-span-2">
-          <ResponsiveContainer width="100%" height={250}>
+        <div className="bg-white/[0.03] border border-white/[0.07] rounded-2xl p-6 lg:col-span-2">
+          <p className="text-[10px] font-black text-white/55 uppercase tracking-[0.2em] mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Loss Ratio Trend</p>
+          <p className="text-xs text-white/55 mb-4">8 weeks</p>
+          <ResponsiveContainer width="100%" height={220}>
             <AreaChart data={analytics.weekly_trend}>
               <defs>
-                <linearGradient id="colorLossRatio" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#F59E0B" stopOpacity={0.3} />
+                <linearGradient id="gLoss" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#F59E0B" stopOpacity={0.25} />
                   <stop offset="95%" stopColor="#F59E0B" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-              <XAxis dataKey="week" stroke="#94A3B8" tick={{ fill: '#94A3B8', fontSize: 12 }} />
-              <YAxis stroke="#94A3B8" tick={{ fill: '#94A3B8', fontSize: 12 }} tickFormatter={(v) => `${v}%`} />
-              <Tooltip 
-                contentStyle={{ backgroundColor: '#1E293B', border: '1px solid #334155', borderRadius: '8px' }}
-                formatter={(value: any) => `${value.toFixed(1)}%`}
-              />
-              <Area 
-                type="monotone" 
-                dataKey="loss_ratio" 
-                stroke="#F59E0B" 
-                fill="url(#colorLossRatio)" 
-                name="Loss Ratio"
-              />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+              <XAxis dataKey="week" stroke="rgba(255,255,255,0.2)" tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 11 }} />
+              <YAxis stroke="rgba(255,255,255,0.2)" tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 11 }} tickFormatter={(v) => `${v}%`} />
+              <Tooltip contentStyle={{ backgroundColor: '#161C27', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', color: '#fff' }} formatter={(v: any) => `${v.toFixed(1)}%`} />
+              <Area type="monotone" dataKey="loss_ratio" stroke="#F59E0B" fill="url(#gLoss)" name="Loss Ratio" strokeWidth={2} />
             </AreaChart>
           </ResponsiveContainer>
-        </Card>
+        </div>
       </div>
 
-      {/* City Risk Heatmap */}
-      <Card title="City Risk Heatmap" subtitle="Average risk scores by city">
-        <div className="space-y-2">
+      <div className="bg-white/[0.03] border border-white/[0.07] rounded-2xl p-6">
+        <p className="text-[10px] font-black text-white/55 uppercase tracking-[0.2em] mb-5" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>City Risk Heatmap</p>
+        <div className="space-y-3">
           {analytics.city_stats.map((city: any) => (
             <div key={city.city} className="flex items-center gap-4">
-              <div className="w-32 font-semibold text-slate-100">{city.city}</div>
+              <div className="w-28 text-sm font-black text-white/60" style={{ fontFamily: "'Barlow', sans-serif" }}>{city.city}</div>
               <div className="flex-1">
-                <div className="w-full bg-slate-700 rounded-full h-6 overflow-hidden">
-                  <div 
-                    className={`h-6 rounded-full flex items-center justify-end px-2 text-xs font-bold text-white ${
-                      city.avg_risk_tier === 'high' ? 'bg-red-500' :
-                      city.avg_risk_tier === 'medium' ? 'bg-amber-500' :
-                      'bg-emerald-500'
-                    }`}
+                <div className="w-full bg-white/5 rounded-full h-5 overflow-hidden">
+                  <div
+                    className={`h-5 rounded-full flex items-center justify-end px-2 text-[9px] font-black text-white ${city.avg_risk_tier === 'high' ? 'bg-red-500' : city.avg_risk_tier === 'medium' ? 'bg-amber-500' : 'bg-[#22C55E]'}`}
                     style={{ width: `${(city.worker_count / analytics.total_workers) * 100}%` }}
                   >
-                    {city.worker_count} workers
+                    {city.worker_count}
                   </div>
                 </div>
               </div>
-              <Badge variant={city.avg_risk_tier as any} size="sm">
-                {city.avg_risk_tier}
-              </Badge>
+              <Badge variant={city.avg_risk_tier as any} size="sm">{city.avg_risk_tier}</Badge>
             </div>
           ))}
         </div>
-      </Card>
+      </div>
     </motion.div>
   );
 };
