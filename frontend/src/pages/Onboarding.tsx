@@ -13,7 +13,7 @@ import { AppBackground } from '../components/AppBackground';
 const cities = ['Hyderabad', 'Bangalore', 'Mumbai', 'Delhi', 'Chennai', 'Pune'];
 const platforms = [
   { value: 'zepto', label: 'Zepto', color: 'bg-yellow-500' },
-  { value: 'blinkit', label: 'Blinkit', color: 'bg-orange-500' },
+  { value: 'blinkit', label: 'Blinkit', color: 'bg-blue-500' },
   { value: 'swiggy_instamart', label: 'Swiggy Instamart', color: 'bg-purple-500' },
   { value: 'multiple', label: 'Multiple Platforms', color: 'bg-blue-500' }
 ];
@@ -145,10 +145,10 @@ export const Onboarding: React.FC = () => {
         {/* Header */}
         <div className="text-left mb-8">
           <div className="flex items-center gap-3 mb-2">
-            <span className="p-2 bg-[#F97316]/20 rounded-lg">
-              <ShieldCheck className="w-5 h-5 text-[#F97316]" />
+            <span className="p-2 bg-[#5690FF]/20 rounded-lg">
+              <ShieldCheck className="w-5 h-5 text-[#5690FF]" />
             </span>
-            <span className="font-label text-[#F97316] text-xs tracking-widest uppercase">Verified Protection</span>
+            <span className="font-label text-[#5690FF] text-xs tracking-widest uppercase">Verified Protection</span>
           </div>
           <h1 className="text-5xl font-black mb-3 text-white leading-tight">Secure Your<br/>Earnings Now</h1>
           <p className="text-[#94A3B8] text-lg max-w-md">Our AI risk engine calculates your custom protection in under 60 seconds.</p>
@@ -162,9 +162,9 @@ export const Onboarding: React.FC = () => {
                 <div
                   className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all ${
                     s === step
-                      ? 'bg-[#F97316] text-white shadow-lg shadow-[#F97316]/50'
+                      ? 'bg-[#5690FF] text-white shadow-lg shadow-[#5690FF]/50'
                       : s < step
-                      ? 'bg-[#F97316] text-white'
+                      ? 'bg-[#5690FF] text-white'
                       : 'bg-white/10 text-[#94A3B8]'
                   }`}
                 >
@@ -173,7 +173,7 @@ export const Onboarding: React.FC = () => {
                 {s < 4 && (
                   <div
                     className={`flex-1 h-1 mx-2 rounded ${
-                      s < step ? 'bg-[#F97316]' : 'bg-white/10'
+                      s < step ? 'bg-[#5690FF]' : 'bg-white/10'
                     }`}
                   />
                 )}
@@ -204,7 +204,7 @@ export const Onboarding: React.FC = () => {
               >
                 <div className="md:col-span-3 space-y-6">
                   <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                    <User className="w-6 h-6 text-[#F97316]" /> Personal Information
+                    <User className="w-6 h-6 text-[#5690FF]" /> Personal Information
                   </h2>
                   <div className="space-y-4">
                     <div className="relative">
@@ -215,7 +215,7 @@ export const Onboarding: React.FC = () => {
                           type="text"
                           value={formData.name}
                           onChange={(e) => updateField('name', e.target.value)}
-                          className="w-full bg-black/40 border border-white/10 backdrop-blur-md rounded-xl pl-12 pr-4 py-4 text-white focus:outline-none focus:border-[#F97316] transition-all placeholder:text-white/20"
+                          className="w-full bg-black/40 border border-white/10 backdrop-blur-md rounded-xl pl-12 pr-4 py-4 text-white focus:outline-none focus:border-[#5690FF] transition-all placeholder:text-white/20"
                           placeholder="Your official ID name"
                         />
                       </div>
@@ -231,7 +231,7 @@ export const Onboarding: React.FC = () => {
                           type="tel"
                           value={formData.phone}
                           onChange={(e) => updateField('phone', e.target.value.replace(/\D/g, '').slice(0, 10))}
-                          className="flex-1 bg-black/40 border border-white/10 backdrop-blur-md rounded-r-xl px-4 py-4 text-white focus:outline-none focus:border-[#F97316] transition-all"
+                          className="flex-1 bg-black/40 border border-white/10 backdrop-blur-md rounded-r-xl px-4 py-4 text-white focus:outline-none focus:border-[#5690FF] transition-all"
                           placeholder="Mobile number"
                           maxLength={10}
                         />
@@ -246,7 +246,7 @@ export const Onboarding: React.FC = () => {
                           <select
                             value={formData.city}
                             onChange={(e) => updateField('city', e.target.value)}
-                            className="w-full bg-black/40 border border-white/10 backdrop-blur-md rounded-xl pl-12 pr-4 py-4 text-white appearance-none focus:outline-none focus:border-[#F97316] transition-all"
+                            className="w-full bg-black/40 border border-white/10 backdrop-blur-md rounded-xl pl-12 pr-4 py-4 text-white appearance-none focus:outline-none focus:border-[#5690FF] transition-all"
                           >
                             <option value="">Select city</option>
                             {cities.map(city => (
@@ -264,7 +264,7 @@ export const Onboarding: React.FC = () => {
                             type="text"
                             value={formData.dark_store_name}
                             onChange={(e) => updateField('dark_store_name', e.target.value)}
-                            className="w-full bg-black/40 border border-white/10 backdrop-blur-md rounded-xl pl-12 pr-4 py-4 text-white focus:outline-none focus:border-[#F97316] transition-all"
+                            className="w-full bg-black/40 border border-white/10 backdrop-blur-md rounded-xl pl-12 pr-4 py-4 text-white focus:outline-none focus:border-[#5690FF] transition-all"
                             placeholder="Store Zone"
                           />
                         </div>
@@ -275,8 +275,8 @@ export const Onboarding: React.FC = () => {
 
                 <div className="md:col-span-2">
                   <div className="h-full bg-white/[0.02] border border-white/5 rounded-2xl p-6 flex flex-col justify-center">
-                    <div className="mb-6 p-5 bg-[#F97316]/10 rounded-2xl border border-[#F97316]/20">
-                      <p className="font-bold text-[#F97316] mb-2 flex items-center gap-2">
+                    <div className="mb-6 p-5 bg-[#5690FF]/10 rounded-2xl border border-[#5690FF]/20">
+                      <p className="font-bold text-[#5690FF] mb-2 flex items-center gap-2">
                         <TrendingUp className="w-4 h-4" /> Why location?
                       </p>
                       <p className="text-xs text-[#94A3B8] leading-relaxed">
@@ -285,7 +285,7 @@ export const Onboarding: React.FC = () => {
                     </div>
                     <div className="space-y-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-[#F97316]/20 flex items-center justify-center text-xs font-bold text-[#F97316]">1</div>
+                        <div className="w-8 h-8 rounded-full bg-[#5690FF]/20 flex items-center justify-center text-xs font-bold text-[#5690FF]">1</div>
                         <p className="text-sm text-[#CBD5E1]">Account Setup</p>
                       </div>
                       <div className="flex items-center gap-3 opacity-30">
@@ -308,7 +308,7 @@ export const Onboarding: React.FC = () => {
                 transition={{ duration: 0.3 }}
               >
                 <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                  <Smartphone className="w-6 h-6 text-[#F97316]" /> Platform & Shift
+                  <Smartphone className="w-6 h-6 text-[#5690FF]" /> Platform & Shift
                 </h2>
                 
                 <div className="mb-6">
@@ -320,7 +320,7 @@ export const Onboarding: React.FC = () => {
                         onClick={() => updateField('platform', platform.value)}
                         className={`p-4 rounded-xl border-2 transition-all ${
                           formData.platform === platform.value
-                            ? 'border-[#F97316] bg-[#F97316]/10'
+                            ? 'border-[#5690FF] bg-[#5690FF]/10'
                             : 'border-white/10 bg-black/20 hover:border-white/20'
                         }`}
                       >
@@ -340,12 +340,12 @@ export const Onboarding: React.FC = () => {
                         onClick={() => updateField('shift_type', shift.value)}
                         className={`p-4 rounded-xl border transition-all text-left ${
                           formData.shift_type === shift.value
-                            ? 'border-[#F97316] bg-[#F97316]/10'
+                            ? 'border-[#5690FF] bg-[#5690FF]/10'
                             : 'border-white/10 bg-black/20 hover:border-white/20'
                         }`}
                       >
                         <div className="font-bold text-white flex items-center gap-2">
-                           <Clock className="w-4 h-4 text-[#F97316]" /> {shift.label}
+                           <Clock className="w-4 h-4 text-[#5690FF]" /> {shift.label}
                         </div>
                         <div className="text-xs text-[#94A3B8] mt-1">{shift.time}</div>
                       </button>
@@ -358,7 +358,7 @@ export const Onboarding: React.FC = () => {
                   <select
                     value={Object.keys(experienceToMonths).find(k => experienceToMonths[k] === formData.experience_months)}
                     onChange={(e) => updateField('experience_months', experienceToMonths[e.target.value])}
-                    className="w-full bg-black/20 border border-white/10 backdrop-blur-md rounded-xl px-4 py-4 text-white focus:outline-none focus:border-[#F97316]"
+                    className="w-full bg-black/20 border border-white/10 backdrop-blur-md rounded-xl px-4 py-4 text-white focus:outline-none focus:border-[#5690FF]"
                   >
                     {experiences.map(exp => (
                       <option key={exp} value={exp} className="bg-[#0C1117]">{exp}</option>
@@ -378,7 +378,7 @@ export const Onboarding: React.FC = () => {
                 transition={{ duration: 0.3 }}
               >
                 <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                  <TrendingUp className="w-6 h-6 text-[#F97316]" /> Earnings Information
+                  <TrendingUp className="w-6 h-6 text-[#5690FF]" /> Earnings Information
                 </h2>
                 
                 <div className="mb-6">
@@ -392,18 +392,18 @@ export const Onboarding: React.FC = () => {
                       max="60"
                       value={formData.avg_daily_orders}
                       onChange={(e) => updateField('avg_daily_orders', parseInt(e.target.value))}
-                      className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#F97316]"
+                      className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#5690FF]"
                     />
                     <div className="flex justify-between mt-4">
                       <span className="text-[#94A3B8] text-xs font-semibold">5 orders</span>
-                      <div className="bg-[#F97316] text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg shadow-[#F97316]/30">
+                      <div className="bg-[#5690FF] text-white px-4 py-1 rounded-full text-sm font-bold shadow-lg shadow-[#5690FF]/30">
                         {formData.avg_daily_orders} orders/day
                       </div>
                       <span className="text-[#94A3B8] text-xs font-semibold">60 orders</span>
                     </div>
                   </div>
 
-                  <div className="mt-8 p-6 bg-gradient-to-r from-[#F97316]/20 to-transparent rounded-2xl border border-[#F97316]/20 flex items-center justify-between">
+                  <div className="mt-8 p-6 bg-gradient-to-r from-[#5690FF]/20 to-transparent rounded-2xl border border-[#5690FF]/20 flex items-center justify-between">
                     <div>
                       <div className="text-xs text-[#94A3B8] uppercase tracking-wider font-bold mb-1">Typical daily earnings</div>
                       <div className="text-3xl font-black text-white">
@@ -412,7 +412,7 @@ export const Onboarding: React.FC = () => {
                     </div>
                     <div className="text-right">
                        <div className="text-[10px] text-[#94A3B8] uppercase font-bold mb-1">Monthly Potential</div>
-                       <div className="text-xl font-bold text-[#F97316]">₹{formData.avg_daily_orders * 18 * 26}</div>
+                       <div className="text-xl font-bold text-[#5690FF]">₹{formData.avg_daily_orders * 18 * 26}</div>
                     </div>
                   </div>
                 </div>
@@ -425,7 +425,7 @@ export const Onboarding: React.FC = () => {
                     type="text"
                     value={formData.upi_id}
                     onChange={(e) => updateField('upi_id', e.target.value)}
-                    className="w-full bg-black/20 border border-white/10 backdrop-blur-md rounded-xl px-4 py-4 text-white focus:outline-none focus:border-[#F97316]"
+                    className="w-full bg-black/20 border border-white/10 backdrop-blur-md rounded-xl px-4 py-4 text-white focus:outline-none focus:border-[#5690FF]"
                     placeholder="yourname@upi"
                   />
                 </div>
@@ -447,7 +447,7 @@ export const Onboarding: React.FC = () => {
                       animate={{ opacity: [0.5, 1, 0.5] }}
                       transition={{ repeat: Infinity, duration: 2 }}
                     >
-                      <Loader2 className="w-16 h-16 text-[#F97316] animate-spin mb-6" />
+                      <Loader2 className="w-16 h-16 text-[#5690FF] animate-spin mb-6" />
                     </motion.div>
                     <div className="space-y-3 text-center">
                       <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-[#CBD5E1]">🔍 Analysing delivery zone...</motion.p>
@@ -457,7 +457,7 @@ export const Onboarding: React.FC = () => {
                   </div>
                 ) : workerResult ? (
                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-                    <h2 className="text-2xl font-bold mb-6 underline decoration-[#F97316]">AI Risk Assessment</h2>
+                    <h2 className="text-2xl font-bold mb-6 underline decoration-[#5690FF]">AI Risk Assessment</h2>
                     <div className="grid md:grid-cols-2 gap-6 mb-6">
                       <RiskGauge score={workerResult.risk_profile.risk_score} tier={workerResult.risk_profile.risk_tier} />
                       <div className="space-y-4">
@@ -467,8 +467,8 @@ export const Onboarding: React.FC = () => {
                     </div>
                     <div className="grid md:grid-cols-3 gap-4">
                       {workerResult.recommended_plans.map(plan => (
-                        <div key={plan.plan_type} className={`border-2 rounded-xl p-4 transition-all ${plan.recommended ? 'border-[#F97316] bg-[#F97316]/5' : 'border-white/10 background-blur-xl'}`}>
-                           {plan.recommended && <div className="text-[10px] text-[#F97316] font-bold uppercase mb-1">Recommended</div>}
+                        <div key={plan.plan_type} className={`border-2 rounded-xl p-4 transition-all ${plan.recommended ? 'border-[#5690FF] bg-[#5690FF]/5' : 'border-white/10 background-blur-xl'}`}>
+                           {plan.recommended && <div className="text-[10px] text-[#5690FF] font-bold uppercase mb-1">Recommended</div>}
                           <Badge variant={plan.plan_type}>{plan.plan_type}</Badge>
                           <div className="text-2xl font-black mt-2 text-white text-center">₹{plan.weekly_premium}</div>
                           <Button className="w-full mt-4" size="sm" onClick={() => handlePlanSelect(plan.plan_type)} loading={selectedPlan === plan.plan_type && loading}>Select</Button>

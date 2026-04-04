@@ -10,7 +10,7 @@ function useFonts() {
     link.id = 'sw-fonts-v2';
     link.rel = 'stylesheet';
     link.href =
-      'https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800;900&family=DM+Sans:wght@300;400;500&family=Space+Grotesk:wght@300;400;500;600&display=swap';
+      'https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800;900&family=DM+Sans:wght@300;400;500&family=Space+Grotesk:wght@300;400;500;600&family=Poppins:ital,wght@1,600&display=swap';
     document.head.appendChild(link);
   }, []);
 }
@@ -21,8 +21,8 @@ const C = {
   surface: '#161C27',
   surface2: '#1E2537',
   border: 'rgba(255,255,255,0.07)',
-  orange: '#F97316',
-  orangeHover: '#EA6C0E',
+  orange: '#5690FF',
+  orangeHover: '#4070E0',
   green: '#22C55E',
   white: '#FFFFFF',
   muted: 'rgba(255,255,255,0.55)',
@@ -83,7 +83,7 @@ function Navbar({ onJoin, onAdmin, onLogin }: { onJoin: () => void; onAdmin: () 
         {/* Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingLeft: 8 }}>
           <ShieldIcon />
-          <span style={{ fontFamily: font.display, fontWeight: 800, fontSize: 18, color: C.white, letterSpacing: '-0.01em' }}>SwiftCover</span>
+          <span style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontStyle: 'italic', fontSize: 20, color: C.white, letterSpacing: '-0.01em' }}>Axio</span>
         </div>
 
         {/* Center: Pills */}
@@ -172,7 +172,7 @@ function MiniChart() {
 
   return (
     <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} style={{ overflow: 'visible' }}>
-      <path d={pathD(expected)} fill="none" stroke="rgba(249,115,22,0.7)" strokeWidth="1.5" />
+      <path d={pathD(expected)} fill="none" stroke="rgba(86,144,255,0.7)" strokeWidth="1.5" />
       <path d={pathD(actual)}   fill="none" stroke="rgba(34,197,94,0.7)"  strokeWidth="1.5" strokeDasharray="3 2" />
     </svg>
   );
@@ -339,9 +339,9 @@ function Plans({ onJoin }: { onJoin: () => void }) {
               <motion.div key={p.name}
                 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
                 style={{
-                  background: isPopular ? 'rgba(249, 115, 22, 0.08)' : 'rgba(255, 255, 255, 0.03)',
+                  background: isPopular ? 'rgba(86, 144, 255, 0.08)' : 'rgba(255, 255, 255, 0.03)',
                   backdropFilter: 'blur(16px)',
-                  border: `1px solid ${isPopular ? 'rgba(249, 115, 22, 0.4)' : 'rgba(255, 255, 255, 0.1)'}`,
+                  border: `1px solid ${isPopular ? 'rgba(86, 144, 255, 0.4)' : 'rgba(255, 255, 255, 0.1)'}`,
                   borderRadius: 16,
                   padding: '32px 28px',
                   position: 'relative',
@@ -376,7 +376,7 @@ function Plans({ onJoin }: { onJoin: () => void }) {
                     width: '100%', fontFamily: font.display, fontWeight: 700, fontSize: 14,
                     background: isPopular ? C.orange : 'transparent',
                     color: isPopular ? C.white : C.orange,
-                    border: `1px solid ${isPopular ? C.orange : 'rgba(249,115,22,0.4)'}`,
+                    border: `1px solid ${isPopular ? C.orange : 'rgba(86,144,255,0.4)'}`,
                     borderRadius: 6, padding: '12px', cursor: 'pointer',
                   }}
                   onMouseEnter={e => { e.currentTarget.style.background = C.orange; e.currentTarget.style.color = C.white; }}
@@ -404,7 +404,7 @@ function PartnersAndTestimonial() {
             {[
               { name: 'Zepto', color: '#7C3AED' },
               { name: 'blinkit', color: '#F59E0B' },
-              { name: 'Swiggy Instamart', color: '#F97316' },
+              { name: 'Swiggy Instamart', color: '#5690FF' },
             ].map(p => (
               <div key={p.name} style={{ fontFamily: font.display, fontWeight: 900, fontSize: 20, color: p.color, letterSpacing: '-0.01em' }}>{p.name}</div>
             ))}
@@ -423,7 +423,7 @@ function PartnersAndTestimonial() {
         }}>
           <div style={{ fontFamily: font.label, fontSize: 22, color: C.orange, marginBottom: 8, lineHeight: 1 }}>"</div>
           <p style={{ fontFamily: font.body, fontSize: 14, color: C.muted, lineHeight: 1.7, marginBottom: 16 }}>
-            Last monsoon I lost 4 days of income. With SwiftCover, ₹1,200 was in my UPI before I even checked the app. This is the real deal.
+            Last monsoon I lost 4 days of income. With Axio, ₹1,200 was in my UPI before I even checked the app. This is the real deal.
           </p>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#1A5F3C', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: font.display, fontWeight: 700, fontSize: 14, color: C.white }}>R</div>
@@ -450,9 +450,9 @@ function Footer({ onAdmin }: { onAdmin: () => void }) {
       <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <ShieldIcon />
-          <span style={{ fontFamily: font.display, fontWeight: 800, fontSize: 16, color: C.white }}>SwiftCover</span>
+          <span style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontStyle: 'italic', fontSize: 17, color: C.white }}>Axio</span>
         </div>
-        <span style={{ fontFamily: font.body, fontSize: 12, color: C.mutedLight }}>Guidewire DEVTrails 2026 · AI-Powered Parametric Micro-Insurance</span>
+        <span style={{ fontFamily: font.body, fontSize: 12, color: C.mutedLight }}>Guidewire DEVTrails 2026 · AI-Powered Parametric Micro-Insurance by Axio</span>
         <button onClick={onAdmin} style={{ fontFamily: font.label, fontSize: 12, color: C.mutedLight, background: 'none', border: 'none', cursor: 'pointer' }}>Admin Console</button>
       </div>
     </footer>

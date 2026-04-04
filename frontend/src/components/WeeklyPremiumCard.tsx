@@ -34,10 +34,10 @@ export const WeeklyPremiumCard: React.FC<WeeklyPremiumCardProps> = ({
 
   return (
     <div className="bg-white/[0.03] backdrop-blur-xl border border-white/[0.07] rounded-2xl p-6 relative overflow-hidden" style={{ fontFamily: font.body }}>
-      <div className="absolute -top-10 -right-10 w-32 h-32 bg-[#F97316]/5 rounded-full blur-2xl pointer-events-none" />
+      <div className="absolute -top-10 -right-10 w-32 h-32 bg-[#5690FF]/5 rounded-full blur-2xl pointer-events-none" />
 
       <div className="flex items-center gap-2 mb-5">
-        <Shield className="w-4 h-4 text-[#F97316]" />
+        <Shield className="w-4 h-4 text-[#5690FF]" />
         <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]" style={{ fontFamily: font.label }}>
           Weekly Coverage
         </span>
@@ -49,7 +49,7 @@ export const WeeklyPremiumCard: React.FC<WeeklyPremiumCardProps> = ({
             <span className="text-[9px] text-white/20 font-bold uppercase">{day}</span>
             <div className={clsx(
               'w-full aspect-square rounded-lg flex items-center justify-center text-[9px] font-black transition-all',
-              idx === currentDay ? 'bg-[#F97316] text-white shadow-lg shadow-[#F97316]/30' :
+              idx === currentDay ? 'bg-[#5690FF] text-white shadow-lg shadow-[#5690FF]/30' :
               idx < currentDay ? 'bg-white/10 text-white/40' :
               'bg-white/[0.03] border border-white/[0.06] text-white/20'
             )}>

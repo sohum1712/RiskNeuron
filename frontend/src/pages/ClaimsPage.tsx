@@ -63,7 +63,7 @@ export const ClaimsPage: React.FC = () => {
     >
       {/* Page header */}
       <div className="mb-10">
-        <p className="text-[10px] font-black text-[#F97316] uppercase tracking-[0.2em] mb-2" style={{ fontFamily: font.label }}>
+        <p className="text-[10px] font-black text-[#5690FF] uppercase tracking-[0.2em] mb-2" style={{ fontFamily: font.label }}>
           Claims Ledger
         </p>
         <h1 className="text-4xl font-black tracking-tight mb-1" style={{ fontFamily: font.display }}>
@@ -100,7 +100,7 @@ export const ClaimsPage: React.FC = () => {
             onClick={() => setStatusFilter(status)}
             className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${
               statusFilter === status
-                ? 'bg-[#F97316]/10 border-[#F97316]/30 text-[#F97316]'
+                ? 'bg-[#5690FF]/10 border-[#5690FF]/30 text-[#5690FF]'
                 : 'bg-white/[0.03] border-white/[0.07] text-white/30 hover:text-white/60 hover:bg-white/5'
             }`}
             style={{ fontFamily: font.label }}
@@ -245,7 +245,7 @@ export const ClaimsPage: React.FC = () => {
                         )}
 
                         {claim.auto_processed && (
-                          <p className="text-xs text-[#F97316] mb-2">✓ Auto-processed by AI</p>
+                          <p className="text-xs text-[#5690FF] mb-2">✓ Auto-processed by AI</p>
                         )}
 
                         {claim.payment_reference && (

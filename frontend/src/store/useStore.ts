@@ -63,7 +63,7 @@ export const useStore = create<AppState>()(
       },
     }),
     {
-      name: "swiftcover-storage", // localStorage key
+      name: "axio-storage", // localStorage key
       partialize: (state) => ({
         // Only persist currentWorkerId
         currentWorkerId: state.currentWorkerId,

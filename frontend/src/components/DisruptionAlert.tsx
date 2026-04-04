@@ -60,9 +60,9 @@ export const DisruptionAlert: React.FC<DisruptionAlertProps> = ({ disruptions })
               <motion.div
                 animate={{ opacity: [0.4, 1, 0.4] }}
                 transition={{ repeat: Infinity, duration: 1.5 }}
-                className="w-1.5 h-1.5 rounded-full bg-[#F97316]"
+                className="w-1.5 h-1.5 rounded-full bg-[#5690FF]"
               />
-              <span className="text-[10px] font-black text-[#F97316] uppercase tracking-widest" style={{ fontFamily: font.label }}>
+              <span className="text-[10px] font-black text-[#5690FF] uppercase tracking-widest" style={{ fontFamily: font.label }}>
                 Live
               </span>
             </div>

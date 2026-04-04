@@ -5,11 +5,12 @@ import { Phone, Shield, ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
 import { loginWorker } from '../api/client';
 import { useStore } from '../store/useStore';
 import { AppBackground } from '../components/AppBackground';
+import { BrandLogo } from '../components/BrandLogo';
 import toast from 'react-hot-toast';
 
 const C = {
-  orange: '#F97316',
-  orangeHover: '#EA6C0E',
+  orange: '#5690FF',
+  orangeHover: '#4070E0',
 };
 
 const font = {
@@ -69,10 +70,10 @@ export const Login: React.FC = () => {
         {/* Logo + heading */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-5">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#F97316] to-[#FB923C] flex items-center justify-center shadow-lg shadow-[#F97316]/30">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#5690FF] to-[#7AABFF] flex items-center justify-center shadow-lg shadow-[#5690FF]/30">
               <Shield size={20} color="#fff" />
             </div>
-            <span style={{ fontFamily: font.display, fontWeight: 800, fontSize: 18, letterSpacing: '-0.01em' }}>SwiftCover</span>
+            <span style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontStyle: 'italic', fontSize: 20, letterSpacing: '-0.01em' }}>Axio</span>
           </div>
           <h1 style={{ fontFamily: font.display, fontWeight: 800, fontSize: 40, lineHeight: 1.05, letterSpacing: '-0.02em', marginBottom: 10 }}>
             Welcome<br />back.
@@ -90,7 +91,7 @@ export const Login: React.FC = () => {
             </label>
 
             <div
-              className="flex items-center bg-white/[0.06] border border-white/[0.12] rounded-xl overflow-hidden mb-5 focus-within:border-[#F97316]/60 transition-colors"
+              className="flex items-center bg-white/[0.06] border border-white/[0.12] rounded-xl overflow-hidden mb-5 focus-within:border-[#5690FF]/60 transition-colors"
             >
               <div className="flex items-center gap-2 px-4 py-4 border-r border-white/[0.10] text-white/60">
                 <Phone size={15} />
@@ -119,7 +120,7 @@ export const Login: React.FC = () => {
               className="w-full flex items-center justify-center gap-2.5 py-4 rounded-xl font-black text-base transition-all"
               style={{
                 fontFamily: font.display,
-                background: phone.length === 10 ? C.orange : 'rgba(249,115,22,0.25)',
+                background: phone.length === 10 ? C.orange : 'rgba(86,144,255,0.25)',
                 color: phone.length === 10 ? '#fff' : 'rgba(255,255,255,0.4)',
                 cursor: phone.length === 10 ? 'pointer' : 'not-allowed',
                 letterSpacing: '0.01em',
@@ -136,7 +137,7 @@ export const Login: React.FC = () => {
           {/* Divider */}
           <div className="flex items-center gap-4 my-6">
             <div className="flex-1 h-px bg-white/[0.08]" />
-            <span style={{ fontFamily: font.label, fontSize: 10, color: 'rgba(255,255,255,0.30)', letterSpacing: '0.12em' }}>NEW TO SWIFTCOVER?</span>
+            <span style={{ fontFamily: font.label, fontSize: 10, color: 'rgba(255,255,255,0.30)', letterSpacing: '0.12em' }}>NEW TO AXIO?</span>
             <div className="flex-1 h-px bg-white/[0.08]" />
           </div>
 
@@ -146,10 +147,10 @@ export const Login: React.FC = () => {
             style={{
               fontFamily: font.display, fontWeight: 700, fontSize: 14,
               background: 'transparent', color: C.orange,
-              border: '1px solid rgba(249,115,22,0.35)', cursor: 'pointer',
+              border: '1px solid rgba(86,144,255,0.35)', cursor: 'pointer',
             }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(249,115,22,0.08)'; e.currentTarget.style.borderColor = 'rgba(249,115,22,0.55)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'rgba(249,115,22,0.35)'; }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(86,144,255,0.08)'; e.currentTarget.style.borderColor = 'rgba(86,144,255,0.55)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'rgba(86,144,255,0.35)'; }}
           >
             Create Account — Free Quote <ArrowRight size={14} />
           </button>

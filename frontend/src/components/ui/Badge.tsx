@@ -26,7 +26,7 @@ export const Badge: React.FC<BadgeProps> = ({ variant = 'medium', size = 'md', c
     
     // Platforms
     zepto: 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20',
-    blinkit: 'bg-orange-500/10 text-orange-400 border border-orange-500/20',
+    blinkit: 'bg-blue-500/10 text-blue-400 border border-blue-500/20',
     swiggy: 'bg-purple-500/10 text-purple-400 border border-purple-500/20',
     multiple: 'bg-blue-500/10 text-blue-400 border border-blue-500/20',
     

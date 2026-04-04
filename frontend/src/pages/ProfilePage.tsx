@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { 
@@ -12,6 +12,7 @@ import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { useStore } from '../store/useStore';
 import { AppBackground } from '../components/AppBackground';
+import { BrandLogo } from '../components/BrandLogo';
 import toast from 'react-hot-toast';
 
 const font = {
@@ -50,7 +51,7 @@ export const ProfilePage: React.FC = () => {
       <div className="relative min-h-screen bg-[#0C1117] flex items-center justify-center">
         <AppBackground />
         <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 2, ease: "linear" }} className="relative z-10">
-          <User className="w-12 h-12 text-[#F97316]" />
+          <User className="w-12 h-12 text-[#5690FF]" />
         </motion.div>
       </div>
     );
@@ -70,7 +71,7 @@ export const ProfilePage: React.FC = () => {
     <div className="group">
       <label className="text-[10px] font-black text-white/50 uppercase tracking-[0.18em] mb-1.5 block" style={{ fontFamily: font.label }}>{label}</label>
       <div className="flex items-center gap-3 p-3.5 bg-white/[0.05] border border-white/[0.09] rounded-xl group-hover:border-white/[0.15] transition-colors">
-        <Icon className="w-4 h-4 text-[#F97316]/70 flex-shrink-0" />
+        <Icon className="w-4 h-4 text-[#5690FF]/70 flex-shrink-0" />
         <span className="text-sm font-medium text-white/85 flex-1" style={{ fontFamily: font.body }}>{value || '—'}</span>
         {editable && (
           <span className="text-[9px] font-black text-white/30 uppercase tracking-widest px-2 py-0.5 bg-white/[0.05] rounded" style={{ fontFamily: font.label }}>EDIT</span>
@@ -78,6 +79,14 @@ export const ProfilePage: React.FC = () => {
       </div>
     </div>
   );
+
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const fn = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', fn);
+    return () => window.removeEventListener('scroll', fn);
+  }, []);
 
   const navItems = workerId ? [
     { label: 'Dashboard', path: `/dashboard/${workerId}` },
@@ -88,41 +97,72 @@ export const ProfilePage: React.FC = () => {
   return (
     <div className="min-h-screen text-white relative" style={{ fontFamily: font.body }}>
       
-      {/* ─── Background ─── */}
       <AppBackground />
 
-      {/* ─── Sticky Nav ─── */}
-      <nav className="fixed top-0 left-0 right-0 z-[100] py-4 px-6 lg:px-12 bg-[#0C1117]/80 backdrop-blur-2xl border-b border-white/10">
-        <div className="max-w-5xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button onClick={() => navigate(`/dashboard/${workerId}`)} className="p-2 hover:bg-white/5 rounded-xl border border-white/10 transition-all group" aria-label="Back to dashboard">
-              <ArrowLeft className="w-4 h-4 text-white/40 group-hover:text-white group-hover:-translate-x-0.5 transition-all" />
+      {/* ─── Floating pill navbar ─── */}
+      <nav style={{
+        position: 'fixed', top: 20, left: 0, right: 0, zIndex: 100,
+        display: 'flex', justifyContent: 'center', pointerEvents: 'none',
+      }}>
+        <div style={{
+          backdropFilter: scrolled ? 'blur(40px)' : 'none',
+          background: scrolled ? 'rgba(12,17,23,0.75)' : 'transparent',
+          border: scrolled ? '1px solid rgba(255,255,255,0.12)' : '1px solid transparent',
+          borderRadius: 40, padding: '6px 8px',
+          display: 'flex', alignItems: 'center', pointerEvents: 'auto', gap: 8,
+          transition: 'all 0.3s ease-in-out',
+          boxShadow: scrolled ? '0 8px 32px rgba(0,0,0,0.3)' : 'none',
+        }}>
+          {/* Back + Logo */}
+          <div className="flex items-center gap-2 px-1">
+            <button
+              onClick={() => navigate(`/dashboard/${workerId}`)}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', cursor: 'pointer', transition: 'all 0.2s' }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.16)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.08)')}
+            >
+              <ArrowLeft style={{ width: 14, height: 14, color: 'rgba(255,255,255,0.7)' }} />
             </button>
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 bg-gradient-to-tr from-[#F97316] to-[#FB923C] rounded-lg flex items-center justify-center">
-                <Shield className="w-3.5 h-3.5 text-white" />
+            <button onClick={() => navigate('/')} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: 'none', cursor: 'pointer', padding: '0 4px' }}>
+              <div style={{ width: 32, height: 32, borderRadius: 10, background: 'linear-gradient(135deg, #5690FF, #7AABFF)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(86,144,255,0.35)' }}>
+                <Shield style={{ width: 16, height: 16, color: '#fff' }} />
               </div>
-              <span className="font-black text-sm tracking-tighter hidden sm:block" style={{ fontFamily: font.display }}>SWIFTCOVER</span>
-            </div>
+              <span className="hidden sm:block" style={{ fontFamily: font.display, fontWeight: 800, fontSize: 15, color: '#fff', letterSpacing: '-0.01em' }}>
+                <BrandLogo size={16} />
+              </span>
+            </button>
           </div>
-          <div className="flex items-center gap-2">
-            {navItems.map((item) => (
-              <button key={item.label} onClick={() => navigate(item.path)}
-                className="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border bg-white/[0.03] border-white/10 text-white/40 hover:text-white hover:bg-white/5"
-                style={{ fontFamily: font.label }}>
-                {item.label}
-              </button>
-            ))}
+
+          {/* Center label */}
+          <div className="hidden md:block px-3 text-center">
+            <p style={{ fontFamily: font.label, fontSize: 9, fontWeight: 900, color: '#5690FF', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 1 }}>Account</p>
+            <p style={{ fontFamily: font.label, fontSize: 11, fontWeight: 900, color: 'rgba(255,255,255,0.7)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>Profile & Settings</p>
+          </div>
+
+          {/* Nav pills */}
+          <div className="flex items-center gap-1 pr-1">
+            {navItems.map((item) => {
+              const isActive = window.location.pathname === item.path;
+              return (
+                <button key={item.label} onClick={() => navigate(item.path)}
+                  style={{ fontFamily: font.label, fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: isActive ? '#5690FF' : 'rgba(255,255,255,0.60)', background: isActive ? 'rgba(86,144,255,0.12)' : 'rgba(255,255,255,0.06)', border: isActive ? '1px solid rgba(86,144,255,0.35)' : '1px solid transparent', borderRadius: 20, padding: '7px 14px', cursor: 'pointer', transition: 'all 0.2s' }}
+                  onMouseEnter={e => { if (!isActive) { e.currentTarget.style.background = 'rgba(255,255,255,0.12)'; e.currentTarget.style.color = '#fff'; }}}
+                  onMouseLeave={e => { if (!isActive) { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'rgba(255,255,255,0.60)'; }}}
+                >
+                  {item.label}
+                </button>
+              );
+            })}
           </div>
         </div>
       </nav>
 
       {/* ─── Content ─── */}
-      <div className="relative z-10 max-w-5xl mx-auto px-6 pt-24 pb-16">
+      <div className="relative z-10 max-w-5xl mx-auto px-6 pt-28 pb-16">
         
         {/* ─── Header ─── */}
         <div className="mb-10">
-          <p className="text-[9px] font-black text-[#F97316] uppercase tracking-[0.2em] mb-2" style={{ fontFamily: font.label }}>
+          <p className="text-[9px] font-black text-[#5690FF] uppercase tracking-[0.2em] mb-2" style={{ fontFamily: font.label }}>
             Account Settings
           </p>
           <h1 className="text-3xl lg:text-4xl font-black tracking-tight" style={{ fontFamily: font.display }}>
@@ -136,12 +176,12 @@ export const ProfilePage: React.FC = () => {
           className="bg-white/[0.03] backdrop-blur-2xl border border-white/[0.06] rounded-3xl p-8 mb-8 relative overflow-hidden"
         >
           {/* Decorative glow */}
-          <div className="absolute -top-20 -right-20 w-60 h-60 bg-[#F97316]/5 rounded-full blur-3xl" />
+          <div className="absolute -top-20 -right-20 w-60 h-60 bg-[#5690FF]/5 rounded-full blur-3xl" />
           
           <div className="relative flex flex-col sm:flex-row items-start sm:items-center gap-6">
             {/* Avatar */}
             <div className="relative">
-              <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-[#F97316] to-[#EA580C] flex items-center justify-center text-4xl font-black shadow-2xl shadow-[#F97316]/20" style={{ fontFamily: font.display }}>
+              <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-[#5690FF] to-[#3D5FCC] flex items-center justify-center text-4xl font-black shadow-2xl shadow-[#5690FF]/20" style={{ fontFamily: font.display }}>
                 {worker.name.charAt(0).toUpperCase()}
               </div>
               <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#22C55E] border-4 border-[#0C1117] flex items-center justify-center">
@@ -165,7 +205,7 @@ export const ProfilePage: React.FC = () => {
             {/* Quick Stats */}
             <div className="grid grid-cols-2 gap-4">
               <div className="text-center px-6 py-3 bg-white/[0.03] rounded-xl border border-white/[0.04]">
-                <p className="text-2xl font-black text-[#F97316]" style={{ fontFamily: font.display }}>{Math.round(worker.risk_score * 100)}</p>
+                <p className="text-2xl font-black text-[#5690FF]" style={{ fontFamily: font.display }}>{Math.round(worker.risk_score * 100)}</p>
                 <p className="text-[9px] text-white/20 font-bold uppercase tracking-widest" style={{ fontFamily: font.label }}>Risk Score</p>
               </div>
               <div className="text-center px-6 py-3 bg-white/[0.03] rounded-xl border border-white/[0.04]">
@@ -188,13 +228,13 @@ export const ProfilePage: React.FC = () => {
                   onClick={() => setActiveTab(tab.id)}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-left ${
                     activeTab === tab.id
-                      ? 'bg-[#F97316]/10 text-[#F97316]'
+                      ? 'bg-[#5690FF]/10 text-[#5690FF]'
                       : 'text-white/40 hover:bg-white/[0.04] hover:text-white/60'
                   }`}
                 >
                   <tab.icon className="w-4 h-4" />
                   <span className="text-sm font-bold" style={{ fontFamily: font.body }}>{tab.label}</span>
-                  {activeTab === tab.id && <ChevronRight className="ml-auto w-4 h-4 text-[#F97316]/40" />}
+                  {activeTab === tab.id && <ChevronRight className="ml-auto w-4 h-4 text-[#5690FF]/40" />}
                 </button>
               ))}
             </div>
@@ -231,7 +271,7 @@ export const ProfilePage: React.FC = () => {
                       <div className="group">
                         <label className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em] mb-1.5 block" style={{ fontFamily: font.label }}>Experience</label>
                         <div className="flex items-center gap-3 p-3.5 bg-white/[0.03] border border-white/[0.06] rounded-xl">
-                          <Briefcase className="w-4 h-4 text-[#F97316]/60 flex-shrink-0" />
+                          <Briefcase className="w-4 h-4 text-[#5690FF]/60 flex-shrink-0" />
                           <span className="text-sm font-medium text-white/70">{worker.experience_months} months</span>
                         </div>
                       </div>
@@ -245,7 +285,7 @@ export const ProfilePage: React.FC = () => {
                       <div className="group">
                         <label className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em] mb-1.5 block" style={{ fontFamily: font.label }}>UPI ID</label>
                         <div className="flex items-center gap-3 p-3.5 bg-white/[0.03] border border-white/[0.06] rounded-xl">
-                          <CreditCard className="w-4 h-4 text-[#F97316]/60 flex-shrink-0" />
+                          <CreditCard className="w-4 h-4 text-[#5690FF]/60 flex-shrink-0" />
                           <span className="text-sm font-medium text-white/70 flex-1">
                             {showUpi ? (worker.upi_id || 'Not set') : '••••••••@upi'}
                           </span>
@@ -289,8 +329,8 @@ export const ProfilePage: React.FC = () => {
 
                       <div className="flex items-center justify-between p-4 bg-white/[0.03] rounded-xl border border-white/[0.04]">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-[#F97316]/10 flex items-center justify-center">
-                            <Shield className="w-5 h-5 text-[#F97316]" />
+                          <div className="w-10 h-10 rounded-lg bg-[#5690FF]/10 flex items-center justify-center">
+                            <Shield className="w-5 h-5 text-[#5690FF]" />
                           </div>
                           <div>
                             <p className="font-bold text-sm text-white/70">Two-Factor Auth</p>
@@ -335,7 +375,7 @@ export const ProfilePage: React.FC = () => {
                           <p className="font-bold text-sm text-white/70">{pref.label}</p>
                           <p className="text-xs text-white/30 mt-0.5">{pref.desc}</p>
                         </div>
-                        <div className={`w-11 h-6 rounded-full transition-colors relative cursor-pointer ${pref.on ? 'bg-[#F97316]' : 'bg-white/10'}`}>
+                        <div className={`w-11 h-6 rounded-full transition-colors relative cursor-pointer ${pref.on ? 'bg-[#5690FF]' : 'bg-white/10'}`}>
                           <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${pref.on ? 'translate-x-[22px]' : 'translate-x-1'}`} />
                         </div>
                       </div>
@@ -364,7 +404,7 @@ export const ProfilePage: React.FC = () => {
                       <div className="flex items-center justify-between p-4 bg-white/[0.02] rounded-xl border border-red-500/10">
                         <div>
                           <p className="font-bold text-sm text-red-400/70">Deactivate Account</p>
-                          <p className="text-xs text-white/30">Permanently disable your SwiftCover account</p>
+                          <p className="text-xs text-white/30">Permanently disable your Axio account</p>
                         </div>
                         <Button className="!bg-red-500/10 hover:!bg-red-500/20 !text-red-400 !text-xs !px-4 !py-1.5 !border !border-red-500/20">
                           Deactivate

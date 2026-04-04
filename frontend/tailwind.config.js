@@ -12,18 +12,18 @@ export default {
         surface: '#161C27',
         surface2: '#1E2537',
         border: 'rgba(255,255,255,0.07)',
-        orange: '#F97316',
-        'orange-hover': '#EA6C0E',
+        orange: '#5690FF',
+        'orange-hover': '#4070E0',
         green: '#22C55E',
         // Legacy aliases kept for backward compat
-        accent: '#F97316',
+        accent: '#5690FF',
         success: '#22C55E',
         warning: '#F59E0B',
         danger: '#EF4444',
         'text-primary': '#FFFFFF',
         'text-muted': 'rgba(255,255,255,0.55)',
         zepto: '#EAB308',
-        blinkit: '#F97316',
+        blinkit: '#5690FF',
         swiggy: '#A855F7',
       },
       fontFamily: {
@@ -40,7 +40,7 @@ export default {
       },
       boxShadow: {
         'card': '0 4px 24px rgba(0,0,0,0.3)',
-        'orange': '0 4px 24px rgba(249,115,22,0.2)',
+        'orange': '0 4px 24px rgba(86,144,255,0.2)',
         'green': '0 4px 24px rgba(34,197,94,0.2)',
       },
       backdropBlur: {

@@ -100,7 +100,7 @@ export const AdminDashboard: React.FC = () => {
   const lossRatio = analytics ? (analytics.payouts_this_week / Math.max(analytics.premiums_this_week, 1)) * 100 : 0;
 
   const kpis = [
-    { label: 'Total Workers', value: analytics?.total_workers || 0, icon: Users, color: '#F97316' },
+    { label: 'Total Workers', value: analytics?.total_workers || 0, icon: Users, color: '#5690FF' },
     { label: 'Active Policies', value: analytics?.active_policies || 0, icon: Shield, color: '#22C55E' },
     { label: 'Claims This Week', value: analytics?.claims_this_week || 0, icon: AlertTriangle, color: '#F59E0B' },
     { label: 'Payouts This Week', value: `₹${analytics?.payouts_this_week?.toFixed(0) || 0}`, icon: DollarSign, color: '#22C55E' },
@@ -111,31 +111,50 @@ export const AdminDashboard: React.FC = () => {
     <div className="relative min-h-screen text-white overflow-x-hidden" style={{ fontFamily: font.body }}>
       <AppBackground />
 
-      {/* Nav */}
-      <nav className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ${scrolled ? 'py-3 bg-[#0C1117]/80 backdrop-blur-2xl border-b border-white/10 px-6 lg:px-12' : 'py-5 bg-transparent px-8 lg:px-16'}`}>
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button onClick={() => navigate('/')} className="p-2 hover:bg-white/5 rounded-xl border border-white/10 transition-all group" aria-label="Back to home">
-              <ArrowLeft className="w-4 h-4 text-white/40 group-hover:text-white group-hover:-translate-x-0.5 transition-all" />
+      {/* Floating pill nav */}
+      <nav style={{
+        position: 'fixed', top: 20, left: 0, right: 0, zIndex: 100,
+        display: 'flex', justifyContent: 'center', pointerEvents: 'none',
+      }}>
+        <div style={{
+          backdropFilter: scrolled ? 'blur(40px)' : 'none',
+          background: scrolled ? 'rgba(12,17,23,0.75)' : 'transparent',
+          border: scrolled ? '1px solid rgba(255,255,255,0.12)' : '1px solid transparent',
+          borderRadius: 40, padding: '6px 10px',
+          display: 'flex', alignItems: 'center', pointerEvents: 'auto', gap: 12,
+          transition: 'all 0.3s ease-in-out',
+          boxShadow: scrolled ? '0 8px 32px rgba(0,0,0,0.3)' : 'none',
+        }}>
+          {/* Back + Logo */}
+          <div className="flex items-center gap-2 px-1">
+            <button onClick={() => navigate('/')}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', cursor: 'pointer', transition: 'all 0.2s' }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.16)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.08)')}
+            >
+              <ArrowLeft style={{ width: 14, height: 14, color: 'rgba(255,255,255,0.7)' }} />
             </button>
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-tr from-[#F97316] to-[#FB923C] rounded-lg flex items-center justify-center shadow-lg shadow-[#F97316]/30">
-                <Shield className="w-4 h-4 text-white" />
+              <div style={{ width: 32, height: 32, borderRadius: 10, background: 'linear-gradient(135deg, #5690FF, #7AABFF)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(86,144,255,0.35)' }}>
+                <Shield style={{ width: 16, height: 16, color: '#fff' }} />
               </div>
-              <span className="font-black text-base tracking-tighter" style={{ fontFamily: font.display }}>SWIFTCOVER</span>
-              <span className="text-[9px] font-black text-[#F97316] uppercase tracking-[0.2em] ml-2 px-2 py-0.5 bg-[#F97316]/10 rounded-md border border-[#F97316]/20" style={{ fontFamily: font.label }}>
+              <span style={{ fontFamily: "'Poppins', sans-serif", fontWeight: 600, fontStyle: 'italic', fontSize: 16, color: '#fff', letterSpacing: '-0.01em' }}>Axio</span>
+              <span style={{ fontFamily: font.label, fontSize: 9, fontWeight: 900, color: '#5690FF', letterSpacing: '0.18em', textTransform: 'uppercase', background: 'rgba(86,144,255,0.12)', border: '1px solid rgba(86,144,255,0.25)', borderRadius: 6, padding: '2px 8px' }}>
                 Insurer Console
               </span>
             </div>
           </div>
-          <div className="font-mono text-sm text-white/60">{format(currentTime, 'MMM dd, yyyy HH:mm:ss')}</div>
+          {/* Clock */}
+          <div style={{ fontFamily: "'Space Grotesk', monospace", fontSize: 12, color: 'rgba(255,255,255,0.55)', letterSpacing: '0.05em', paddingRight: 4 }}>
+            {format(currentTime, 'MMM dd, yyyy HH:mm:ss')}
+          </div>
         </div>
       </nav>
 
-      <main className="pt-24 pb-20 px-6 lg:px-12 max-w-7xl mx-auto">
+      <main className="pt-28 pb-20 px-6 lg:px-12 max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-10">
-          <p className="text-[10px] font-black text-[#F97316] uppercase tracking-[0.2em] mb-2" style={{ fontFamily: font.label }}>Admin</p>
+          <p className="text-[10px] font-black text-[#5690FF] uppercase tracking-[0.2em] mb-2" style={{ fontFamily: font.label }}>Admin</p>
           <h1 className="text-4xl font-black tracking-tight" style={{ fontFamily: font.display }}>Insurer Console</h1>
           <p className="text-white/60 text-sm mt-1">Real-time claims processing & risk management</p>
         </div>
@@ -167,7 +186,7 @@ export const AdminDashboard: React.FC = () => {
           {TABS.map((tab) => (
             <button key={tab} onClick={() => setActiveTab(tab)}
               className={`px-5 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
-                activeTab === tab ? 'bg-[#F97316] text-white shadow-lg shadow-[#F97316]/20' : 'text-white/30 hover:text-white/60'
+                activeTab === tab ? 'bg-[#5690FF] text-white shadow-lg shadow-[#5690FF]/20' : 'text-white/30 hover:text-white/60'
               }`}
               style={{ fontFamily: font.label }}
             >
@@ -208,8 +227,8 @@ const OverviewTab: React.FC<{ analytics: any }> = ({ analytics }) => {
           <AreaChart data={analytics.weekly_trend}>
             <defs>
               <linearGradient id="gPremiums" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#F97316" stopOpacity={0.25} />
-                <stop offset="95%" stopColor="#F97316" stopOpacity={0} />
+                <stop offset="5%" stopColor="#5690FF" stopOpacity={0.25} />
+                <stop offset="95%" stopColor="#5690FF" stopOpacity={0} />
               </linearGradient>
               <linearGradient id="gPayouts" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#EF4444" stopOpacity={0.25} />
@@ -221,7 +240,7 @@ const OverviewTab: React.FC<{ analytics: any }> = ({ analytics }) => {
             <YAxis stroke="rgba(255,255,255,0.2)" tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 11 }} tickFormatter={(v) => `₹${v}`} />
             <Tooltip contentStyle={{ backgroundColor: '#161C27', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', color: '#fff' }} />
             <Legend wrapperStyle={{ color: 'rgba(255,255,255,0.4)', fontSize: 11 }} />
-            <Area type="monotone" dataKey="premiums" stroke="#F97316" fill="url(#gPremiums)" name="Premiums" strokeWidth={2} />
+            <Area type="monotone" dataKey="premiums" stroke="#5690FF" fill="url(#gPremiums)" name="Premiums" strokeWidth={2} />
             <Area type="monotone" dataKey="payouts" stroke="#EF4444" fill="url(#gPayouts)" name="Payouts" strokeWidth={2} />
           </AreaChart>
         </ResponsiveContainer>
@@ -259,7 +278,7 @@ const ClaimsTab: React.FC<{
         {filters.map((f) => (
           <button key={f} onClick={() => setFilter(f)}
             className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${
-              filter === f ? 'bg-[#F97316]/10 border-[#F97316]/30 text-[#F97316]' : 'bg-white/[0.03] border-white/[0.07] text-white/30 hover:text-white/60'
+              filter === f ? 'bg-[#5690FF]/10 border-[#5690FF]/30 text-[#5690FF]' : 'bg-white/[0.03] border-white/[0.07] text-white/30 hover:text-white/60'
             }`}
             style={{ fontFamily: "'Space Grotesk', sans-serif" }}
           >
@@ -359,7 +378,7 @@ const SimulatorTab: React.FC<{
     return 'Metrics auto-filled';
   };
 
-  const selectClass = "w-full bg-white/[0.03] border border-white/[0.07] rounded-xl px-4 py-3 text-white/70 text-sm focus:outline-none focus:border-[#F97316]/50 transition-all";
+  const selectClass = "w-full bg-white/[0.03] border border-white/[0.07] rounded-xl px-4 py-3 text-white/70 text-sm focus:outline-none focus:border-[#5690FF]/50 transition-all";
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="grid lg:grid-cols-2 gap-6">
@@ -382,7 +401,7 @@ const SimulatorTab: React.FC<{
           <div className="grid grid-cols-4 gap-2">
             {disruptionTypes.map((dt) => (
               <button key={dt.value} onClick={() => setDisruption(dt.value)}
-                className={`p-3 rounded-xl border transition-all text-center ${disruption === dt.value ? 'border-[#F97316]/40 bg-[#F97316]/10' : 'border-white/[0.07] bg-white/[0.02] hover:border-white/20'}`}>
+                className={`p-3 rounded-xl border transition-all text-center ${disruption === dt.value ? 'border-[#5690FF]/40 bg-[#5690FF]/10' : 'border-white/[0.07] bg-white/[0.02] hover:border-white/20'}`}>
                 <div className="text-xl mb-1">{dt.icon}</div>
                 <div className="text-[9px] text-white/40 font-bold">{dt.label}</div>
               </button>
@@ -395,7 +414,7 @@ const SimulatorTab: React.FC<{
           <div className="flex gap-2">
             {severities.map((s) => (
               <button key={s} onClick={() => setSeverity(s)}
-                className={`flex-1 py-2 rounded-xl border text-xs font-black capitalize transition-all ${severity === s ? 'border-[#F97316]/40 bg-[#F97316]/10 text-[#F97316]' : 'border-white/[0.07] text-white/30 hover:border-white/20'}`}
+                className={`flex-1 py-2 rounded-xl border text-xs font-black capitalize transition-all ${severity === s ? 'border-[#5690FF]/40 bg-[#5690FF]/10 text-[#5690FF]' : 'border-white/[0.07] text-white/30 hover:border-white/20'}`}
                 style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                 {s}
               </button>
@@ -406,7 +425,7 @@ const SimulatorTab: React.FC<{
         <div>
           <label className="block text-xs font-bold text-white/65 mb-2">Duration: {duration}h</label>
           <input type="range" min="1" max="24" value={duration} onChange={(e) => setDuration(parseInt(e.target.value))}
-            className="w-full h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer accent-[#F97316]" />
+            className="w-full h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer accent-[#5690FF]" />
           <div className="flex justify-between text-[10px] text-white/45 mt-1">
             <span>1h</span><span>24h</span>
           </div>
@@ -414,7 +433,7 @@ const SimulatorTab: React.FC<{
 
         <div className="p-4 bg-white/[0.02] border border-white/[0.05] rounded-xl">
           <p className="text-[10px] text-white/55 uppercase tracking-widest mb-1" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>Auto-filled Metrics</p>
-          <p className="text-base font-black text-[#F97316]" style={{ fontFamily: "'Barlow', sans-serif" }}>{getMetricPreview()}</p>
+          <p className="text-base font-black text-[#5690FF]" style={{ fontFamily: "'Barlow', sans-serif" }}>{getMetricPreview()}</p>
         </div>
 
         <button onClick={onSimulate} disabled={isSimulating}
@@ -435,7 +454,7 @@ const SimulatorTab: React.FC<{
             <p className="text-white/45 text-center py-20 text-xs">Configure a disruption and click Trigger</p>
           )}
           {isSimulating && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2 text-[#F97316]">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2 text-[#5690FF]">
               <Loader2 className="w-4 h-4 animate-spin" /> Processing claims...
             </motion.div>
           )}
@@ -445,7 +464,7 @@ const SimulatorTab: React.FC<{
               <p className="text-white/70">📍 {result.disruption_event.city} — {result.disruption_event.disruption_type.replace(/_/g, ' ')} ({result.disruption_event.severity})</p>
               <p className="text-white/30">⏱️ {format(new Date(result.disruption_event.started_at), 'MMM dd, yyyy HH:mm:ss')}</p>
               <p className="text-white/30">─────────────────────────────────────</p>
-              <p className="text-[#F97316]">Scanning active policies... {result.policies_evaluated} found</p>
+              <p className="text-[#5690FF]">Scanning active policies... {result.policies_evaluated} found</p>
               <p className="text-white/30">─────────────────────────────────────</p>
               {result.claim_details.map((claim: any, idx: number) => (
                 <motion.div key={idx} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.15 }} className="my-2">
@@ -467,7 +486,7 @@ const SimulatorTab: React.FC<{
                 </motion.div>
               ))}
               <p className="text-white/30">─────────────────────────────────────</p>
-              <p className="text-[#F97316]">COMPLETE ({result.processing_time_seconds.toFixed(2)}s)</p>
+              <p className="text-[#5690FF]">COMPLETE ({result.processing_time_seconds.toFixed(2)}s)</p>
               <p className="text-[#22C55E]">Approved: {result.claims_approved} ✅ | Flagged: {result.claims_fraud_flagged} ⚠️</p>
               <p className="text-white/70">Total Payout: ₹{result.total_payout.toFixed(0)}</p>
             </motion.div>
@@ -482,7 +501,7 @@ const SimulatorTab: React.FC<{
 const AnalyticsTab: React.FC<{ analytics: any }> = ({ analytics }) => {
   if (!analytics) return null;
   const claimStatusData = [
-    { name: 'Approved', value: Math.round(analytics.claims_this_week * 0.6), color: '#F97316' },
+    { name: 'Approved', value: Math.round(analytics.claims_this_week * 0.6), color: '#5690FF' },
     { name: 'Rejected', value: Math.round(analytics.claims_this_week * 0.2), color: '#475569' },
     { name: 'Flagged', value: Math.round(analytics.claims_this_week * 0.2), color: '#EF4444' },
   ];

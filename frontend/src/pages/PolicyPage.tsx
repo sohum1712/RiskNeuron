@@ -64,7 +64,7 @@ export const PolicyPage: React.FC = () => {
     >
       {/* Page header */}
       <div className="mb-10">
-        <p className="text-[10px] font-black text-[#F97316] uppercase tracking-[0.2em] mb-2" style={{ fontFamily: font.label }}>
+        <p className="text-[10px] font-black text-[#5690FF] uppercase tracking-[0.2em] mb-2" style={{ fontFamily: font.label }}>
           Protection Node
         </p>
         <h1 className="text-4xl font-black tracking-tight mb-1" style={{ fontFamily: font.display }}>
@@ -88,9 +88,9 @@ export const PolicyPage: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               className="mb-8"
             >
-              <div className="bg-white/[0.03] border border-[#F97316]/20 rounded-2xl p-6 relative overflow-hidden">
+              <div className="bg-white/[0.03] border border-[#5690FF]/20 rounded-2xl p-6 relative overflow-hidden">
                 {/* Glow */}
-                <div className="absolute -top-16 -right-16 w-48 h-48 bg-[#F97316]/5 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute -top-16 -right-16 w-48 h-48 bg-[#5690FF]/5 rounded-full blur-3xl pointer-events-none" />
 
                 <div className="flex items-center gap-3 mb-6">
                   <div className="p-2 bg-[#22C55E]/10 rounded-xl">
@@ -164,7 +164,7 @@ export const PolicyPage: React.FC = () => {
                     <button
                       onClick={() => handleRenew(activePolicy.id, activePolicy.plan_type)}
                       disabled={renewingId === activePolicy.id}
-                      className="flex items-center gap-2 px-5 py-2.5 bg-[#F97316] hover:bg-[#EA6C0E] text-white rounded-xl text-sm font-black transition-all disabled:opacity-50"
+                      className="flex items-center gap-2 px-5 py-2.5 bg-[#5690FF] hover:bg-[#4070E0] text-white rounded-xl text-sm font-black transition-all disabled:opacity-50"
                       style={{ fontFamily: font.label }}
                     >
                       <RotateCcw className="w-4 h-4" />
@@ -182,7 +182,7 @@ export const PolicyPage: React.FC = () => {
               </p>
               <button
                 onClick={() => navigate('/onboarding')}
-                className="px-5 py-2.5 bg-[#F97316] hover:bg-[#EA6C0E] text-white rounded-xl text-sm font-black transition-all"
+                className="px-5 py-2.5 bg-[#5690FF] hover:bg-[#4070E0] text-white rounded-xl text-sm font-black transition-all"
                 style={{ fontFamily: font.label }}
               >
                 Get Coverage →

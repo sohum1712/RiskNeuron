@@ -28,7 +28,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
         fontFamily: "'DM Sans', sans-serif",
       }}>
         <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: 11, marginBottom: 8, fontFamily: "'Space Grotesk', sans-serif", letterSpacing: '0.05em' }}>{label}</p>
-        <p style={{ color: '#F97316', fontSize: 13, marginBottom: 3 }}>Expected: ₹{expected.toFixed(0)}</p>
+        <p style={{ color: '#5690FF', fontSize: 13, marginBottom: 3 }}>Expected: ₹{expected.toFixed(0)}</p>
         <p style={{ color: '#22C55E', fontSize: 13, marginBottom: loss > 0 ? 3 : 0 }}>Actual: ₹{actual.toFixed(0)}</p>
         {loss > 0 && <p style={{ color: '#EF4444', fontSize: 13, fontWeight: 700 }}>Loss: ₹{loss.toFixed(0)}</p>}
       </div>
@@ -45,8 +45,8 @@ export const EarningsChart: React.FC<EarningsChartProps> = ({ data }) => {
       <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
         <defs>
           <linearGradient id="colorExpected" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#F97316" stopOpacity={0.20} />
-            <stop offset="95%" stopColor="#F97316" stopOpacity={0} />
+            <stop offset="5%" stopColor="#5690FF" stopOpacity={0.20} />
+            <stop offset="95%" stopColor="#5690FF" stopOpacity={0} />
           </linearGradient>
           <linearGradient id="colorActual" x1="0" y1="0" x2="0" y2="1">
             <stop offset="5%" stopColor="#22C55E" stopOpacity={0.25} />
@@ -81,7 +81,7 @@ export const EarningsChart: React.FC<EarningsChartProps> = ({ data }) => {
         <Area
           type="monotone"
           dataKey="expected"
-          stroke="#F97316"
+          stroke="#5690FF"
           strokeWidth={2}
           strokeDasharray="5 5"
           fill="url(#colorExpected)"
