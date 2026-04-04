@@ -1,5 +1,5 @@
 """
-SwiftCover FastAPI Application
+Axio FastAPI Application
 Main entry point with lifespan management, CORS, and routing.
 """
 
@@ -27,7 +27,7 @@ async def lifespan(app: FastAPI):
     Lifespan context manager for startup and shutdown events.
     On startup: create tables → train models → seed demo data
     """
-    print("[START] Starting SwiftCover API...")
+    print("[START] Starting Axio API...")
     
     # Create database tables
     print("[DB] Creating database tables...")
@@ -41,16 +41,16 @@ async def lifespan(app: FastAPI):
     print("[SEED] Seeding demo data...")
     seed_demo_data()
     
-    print("[SUCCESS] SwiftCover API ready!")
+    print("[SUCCESS] Axio API ready!")
     
     yield
     
-    print("[SHUTDOWN] Shutting down SwiftCover API...")
+    print("[SHUTDOWN] Shutting down Axio API...")
 
 
 # Create FastAPI app with lifespan
 app = FastAPI(
-    title="SwiftCover API",
+    title="Axio API",
     description="AI-powered parametric micro-insurance for Q-Commerce workers",
     version="1.0.0",
     lifespan=lifespan
@@ -73,7 +73,7 @@ async def health_check():
     """Health check endpoint."""
     return {
         "status": "ok",
-        "service": "SwiftCover"
+        "service": "Axio"
     }
 
 

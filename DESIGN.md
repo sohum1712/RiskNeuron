@@ -1,4 +1,4 @@
-# SwiftCover — Technical Design
+# Axio — Technical Design
 ## Architecture, Schema, APIs, ML Models, Frontend
 
 ---

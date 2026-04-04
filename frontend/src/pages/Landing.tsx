@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import landingBgUrl from '../assets/images/Landing page.jpeg';
-import howItWorksBgUrl from '../assets/images/Bg.jpeg';
+import howItWorksBgUrl from '../assets/images/Bg07.jpeg';
 function useFonts() {
   useEffect(() => {
     if (document.getElementById('sw-fonts-v2')) return;
