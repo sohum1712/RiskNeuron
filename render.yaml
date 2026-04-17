@@ -1,12 +1,12 @@
 services:
-  # 1. FastAPI Backend (Web Service)
+  # FastAPI Backend (Web Service)
   - type: web
     name: axio-backend
     runtime: docker
     dockerContext: ./backend
     dockerfilePath: ./backend/Dockerfile
     plan: free
-    region: singapore # Choose the region closest to you
+    region: singapore
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -15,22 +15,12 @@ services:
       - key: ENVIRONMENT
         value: production
       - key: CORS_ORIGINS
-        value: "*" # Initially permit all, narrow down to frontend URL later
+        value: "*"
       - key: OPENWEATHER_API_KEY
-        sync: false # Set this manually in the Render dashboard
-
-  # 2. React Frontend (Static Site)
-  - type: static_site
-    name: axio-frontend
-    buildCommand: npm install && npm run build
-    publishDir: dist
-    rootDir: frontend
-    envVars:
-      - key: VITE_API_BASE_URL
-        value: https://axio-backend.onrender.com
+        sync: false
 
 databases:
-  # 3. PostgreSQL Database
+  # PostgreSQL Database
   - name: axio-db
     plan: free
     region: singapore
