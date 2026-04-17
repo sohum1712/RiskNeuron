@@ -266,7 +266,7 @@ const OverviewTab: React.FC<{ analytics: any }> = ({ analytics }) => {
 
 // ─── Claims Tab ──────────────────────────────────────────────────────────────
 const ClaimsTab: React.FC<{
-  claims: any[]; loading: boolean; filter: string; setFilter: (f: string) => void;
+  claims: any[] | undefined; loading: boolean; filter: string; setFilter: (f: string) => void;
   expandedClaim: number | null; setExpandedClaim: (id: number | null) => void; refetch: () => void;
 }> = ({ claims, loading, filter, setFilter, expandedClaim, setExpandedClaim }) => {
   const filters = ['all', 'pending', 'approved', 'paid', 'flagged_fraud'];

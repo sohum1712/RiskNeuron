@@ -8,7 +8,7 @@ import { RiskGauge } from '../components/charts/RiskGauge';
 import { registerWorker, createPolicy } from '../api/client';
 import { useStore } from '../store/useStore';
 import toast from 'react-hot-toast';
-import type { OnboardingResponse, PlanOption } from '../types';
+import type { City, Platform, ShiftType, PlanType } from '../types';
 import { AppBackground } from '../components/AppBackground';
 const cities = ['Hyderabad', 'Bangalore', 'Mumbai', 'Delhi', 'Chennai', 'Pune'];
 const platforms = [
@@ -43,7 +43,7 @@ export const Onboarding: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [assessmentLoading, setAssessmentLoading] = useState(false);
   const [workerResult, setWorkerResult] = useState<OnboardingResponse | null>(null);
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<PlanType | null>(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -72,7 +72,10 @@ export const Onboarding: React.FC = () => {
       try {
         const response = await registerWorker({
           ...formData,
-          zone_name: formData.dark_store_name // Use dark store as zone
+          city: formData.city as City,
+          platform: formData.platform as Platform,
+          shift_type: formData.shift_type as ShiftType,
+          zone_name: formData.dark_store_name
         });
         setWorkerResult(response);
         setStep(4);
@@ -86,7 +89,7 @@ export const Onboarding: React.FC = () => {
     }
   };
 
-  const handlePlanSelect = async (planType: string) => {
+  const handlePlanSelect = async (planType: PlanType) => {
     if (!workerResult) return;
     
     setSelectedPlan(planType);
