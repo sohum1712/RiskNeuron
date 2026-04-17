@@ -5,6 +5,7 @@
 
 [build.environment]
   NODE_VERSION = "20.11.0"
+  VITE_API_BASE_URL = "https://axio-backend.onrender.com"
 
 # Redirect all routes to index.html for SPA (React Router)
 [[redirects]]
