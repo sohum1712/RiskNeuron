@@ -1,6 +1,6 @@
 # 🛡️ Axio — AI-Powered Parametric Income Insurance for Q-Commerce & Gig Workers
 
-> **Guidewire DEVTrails 2026 | Phase 2 Submission — Scale & Protect**  
+> **Guidewire DEVTrails 2026 | Phase 3 Submission — Soar**  
 > *Protecting the backbone of India's delivery economy — one week at a time.*
 
 ---
@@ -61,6 +61,23 @@ The platform is a full-stack system: a **FastAPI Python backend** with a **Postg
 | Worker dashboard | ✅ Done | `WorkerDashboard.tsx` — 14-day earnings chart, active policy, claim history |
 | Admin dashboard | ✅ Done | `AdminDashboard.tsx` — Claims queue, disruption simulator, analytics overview |
 | Demo data seeding | ✅ Done | 10 workers × 3 plans, 30-day activity, 4 disruption events, real claims |
+
+---
+
+## 🚀 Phase 3 — What We Built
+
+**Phase 3 Theme: "Soar."** This phase hardened the platform, completed all advanced features, and prepared Axio for production-grade deployment.
+
+| Feature | Status | Implementation Details |
+|---|---|---|
+| Ring detection | ✅ Done | Zone-level fraud pattern matching — 20+ claims in a 10-min window triggers automatic Zone Freeze + admin alert |
+| Photo verification hook | ✅ Done | High-risk `flagged_fraud` claims require photo evidence upload before admin review is unlocked |
+| Prophet-based risk forecasting | ✅ Done | Next-week disruption risk forecast for insurers using historical disruption + weather trend data |
+| External weather API integration | ✅ Done | OpenWeatherMap live polling wired to parametric trigger engine for real-time rainfall, AQI, and heat data |
+| Performance hardening | ✅ Done | DB query optimisation, indexed hot-path columns (`worker_id`, `date`, `status`), response caching on analytics endpoints |
+| Security audit | ✅ Done | Input sanitisation, rate limiting on `/register` and `/simulate`, JWT-ready auth scaffold, secrets moved to env vars |
+| Full deployment pipeline | ✅ Done | Backend deployed on Render, Frontend deployed on Netlify, PostgreSQL on Render managed DB |
+| End-to-end demo flow | ✅ Done | Onboarding → Policy → Disruption Simulation → Auto Claim → UPI Payout — fully working in production |
 
 ---
 
@@ -809,12 +826,14 @@ Copy from `backend/.env.example` and update as needed.
 - [x] Admin dashboard (disruption simulator, claims queue, 8-week trend analytics)
 - [x] Full Docker Compose deployment
 
-### Phase 3 — Soar (April 5–17) 🔄
-- [ ] Ring detection (multi-account fraud pattern matching — 20+ claims/10-min zone freeze)
-- [ ] Photo verification hook for high-risk `flagged_fraud` claims
-- [ ] Prophet-based next-week risk forecasting for insurers
-- [ ] External weather API integration (OpenWeatherMap live polling)
-- [ ] Final performance hardening and security audit
+### Phase 3 — Soar (April 5–17) ✅
+- [x] Ring detection (multi-account fraud pattern matching — 20+ claims/10-min zone freeze)
+- [x] Photo verification hook for high-risk `flagged_fraud` claims
+- [x] Prophet-based next-week risk forecasting for insurers
+- [x] External weather API integration (OpenWeatherMap live polling)
+- [x] Final performance hardening and security audit
+- [x] Production deployment (Render backend + Netlify frontend)
+- [x] End-to-end demo flow validated in production
 
 ---
 
@@ -845,7 +864,7 @@ Copy from `backend/.env.example` and update as needed.
 
 <div align="center">
 
-**Built for Guidewire DEVTrails 2026 | Phase 2 — Scale & Protect**
+**Built for Guidewire DEVTrails 2026 | Phase 3 — Soar**
 
 *Axio — Because every gig worker deserves to be protected.*
 
