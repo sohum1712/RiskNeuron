@@ -24,7 +24,7 @@ def train_and_save_models():
     
     # Check if model already exists
     if os.path.exists(model_path):
-        print(f"✓ Fraud detection model already exists at {model_path}")
+        print(f"[OK] Fraud detection model already exists at {model_path}")
         return
     
     print("Training fraud detection model...")
@@ -84,7 +84,7 @@ def train_and_save_models():
     # Save model
     joblib.dump(model, model_path)
     
-    print(f"✓ Fraud detection model trained and saved to {model_path}")
+    print(f"[OK] Fraud detection model trained and saved to {model_path}")
     print(f"  - Training samples: {len(X_train)} (800 normal + 200 fraud)")
     print(f"  - Model: IsolationForest (n_estimators=100, contamination=0.2)")
     print(f"  - Features: days_since_reg, claim_to_avg_ratio, claim_count_30d, zero_earnings_mild_flag")

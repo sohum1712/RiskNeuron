@@ -3,12 +3,17 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from typing import Generator
+from dotenv import load_dotenv
+
+# Load .env file
+load_dotenv()
 
 # Get DATABASE_URL from environment variable
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql://postgres:swiftcover123@localhost:5432/swiftcover"
+    "sqlite:///./axio.db"
 )
+print(f"[DEBUG] Using DATABASE_URL: {DATABASE_URL}")
 
 # Create SQLAlchemy engine
 engine = create_engine(DATABASE_URL, echo=False)

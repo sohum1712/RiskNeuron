@@ -10,7 +10,7 @@
 # Replace 'https://your-backend-api.onrender.com' with your actual backend URL once deployed.
 [[redirects]]
   from   = "/api/*"
-  to     = "https://your-backend-api.onrender.com/api/:splat"
+  to     = "https://axio-backend.onrender.com/api/:splat"
   status = 200
 
 # Redirect all routes to index.html for SPA (React Router)

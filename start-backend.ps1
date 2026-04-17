@@ -8,9 +8,7 @@ Set-Location backend
 Write-Host "[ACTIVATE] Activating virtual environment..." -ForegroundColor Yellow
 & .\venv\Scripts\Activate.ps1
 
-# Set environment variables
-$env:DATABASE_URL = "postgresql://postgres:swiftcover123@localhost:5432/swiftcover"
-$env:CORS_ORIGINS = "http://localhost:5173"
+# Environment variables are loaded from .env file via python-dotenv in the app
 
 Write-Host "`n[SUCCESS] Starting backend server..." -ForegroundColor Green
 Write-Host "Backend: http://localhost:8000" -ForegroundColor Cyan

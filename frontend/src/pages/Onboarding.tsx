@@ -127,32 +127,88 @@ export const Onboarding: React.FC = () => {
 
     return (
 <div style={{ 
-      minHeight: '100vh', 
-      position: 'relative', 
-      overflow: 'hidden', 
-      fontFamily: '"DM Sans", sans-serif',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'flex-end',
-      padding: '40px'
-    }}>
+  minHeight: '100vh', 
+  position: 'relative', 
+  overflow: 'hidden', 
+  fontFamily: '"DM Sans", sans-serif',
+  display: 'flex',
+  alignItems: 'center',
+  padding: '60px 40px'
+}}>
      <AppBackground />
      <style>{`
        h1, h2, h3 { font-family: 'Barlow', sans-serif !important; }
        .font-label { font-family: 'Space Grotesk', sans-serif !important; }
      `}</style>
-     <div className="w-full max-w-2xl relative z-10 mr-12 ml-auto">
-        {/* Header */}
-        <div className="text-left mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <span className="p-2 bg-[#5690FF]/20 rounded-lg">
-              <ShieldCheck className="w-5 h-5 text-[#5690FF]" />
-            </span>
-            <span className="font-label text-[#5690FF] text-xs tracking-widest uppercase">Verified Protection</span>
-          </div>
-          <h1 className="text-5xl font-black mb-3 text-white leading-tight">Secure Your<br/>Earnings Now</h1>
-          <p className="text-[#94A3B8] text-lg max-w-md">Our AI risk engine calculates your custom protection in under 60 seconds.</p>
-        </div>
+<div className="max-w-7xl mx-auto w-full relative z-10 grid lg:grid-cols-2 gap-16 items-center">
+  {/* Left Column: Branding and Login Option */}
+  <motion.div 
+    initial={{ opacity: 0, x: -30 }}
+    animate={{ opacity: 1, x: 0 }}
+    transition={{ duration: 0.6 }}
+    className="hidden lg:block space-y-10"
+  >
+    <div className="space-y-6">
+      <div className="flex items-center gap-3">
+        <span className="p-2 bg-[#5690FF]/20 rounded-lg">
+          <ShieldCheck className="w-6 h-6 text-[#5690FF]" />
+        </span>
+        <span className="font-label text-[#5690FF] text-sm tracking-[0.2em] uppercase font-bold">Axio Smart Protect</span>
+      </div>
+      <h1 className="text-6xl font-black text-white leading-[1.1] tracking-tight">
+        Protect Your <br/>
+        <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#5690FF] to-[#8eb4ff]">Weekly Income</span>
+      </h1>
+      <p className="text-[#94A3B8] text-xl max-w-md leading-relaxed">
+        The only parametric insurance built specifically for India's delivery partners. Get paid instantly when code, climate, or city events stop your work.
+      </p>
+    </div>
+
+    {/* Sign In Box */}
+    <div className="bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-2xl p-8 max-w-md shadow-2xl">
+      <h3 className="text-white font-bold text-lg mb-3">Already an Axio Partner?</h3>
+      <p className="text-[#94A3B8] text-sm mb-6 leading-relaxed">
+        Sign in to manage your active policies, track claims, or update your UPI settlement details.
+      </p>
+      <button 
+        onClick={() => navigate('/login')}
+        className="group flex items-center gap-3 px-6 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white font-bold hover:bg-[#5690FF]/10 hover:border-[#5690FF]/30 transition-all"
+      >
+        Sign In to Dashboard
+        <ArrowRight className="w-4 h-4 text-[#5690FF] group-hover:translate-x-1 transition-transform" />
+      </button>
+    </div>
+
+    {/* Trust Stats */}
+    <div className="flex gap-10 pt-4">
+      <div>
+        <div className="text-2xl font-black text-white">4.9/5</div>
+        <div className="text-xs text-[#94A3B8] font-label uppercase tracking-widest mt-1">Partner Rating</div>
+      </div>
+      <div>
+        <div className="text-2xl font-black text-white">96%</div>
+        <div className="text-xs text-[#94A3B8] font-label uppercase tracking-widest mt-1">Payout Success</div>
+      </div>
+      <div>
+        <div className="text-2xl font-black text-white">Instant</div>
+        <div className="text-xs text-[#94A3B8] font-label uppercase tracking-widest mt-1">UPI Settlement</div>
+      </div>
+    </div>
+  </motion.div>
+
+  {/* Right Column: Registration Form (Existing) */}
+  <div className="w-full max-w-2xl ml-auto">
+    {/* Header for mobile (hidden on lg) */}
+    <div className="lg:hidden text-left mb-8">
+      <div className="flex items-center gap-3 mb-2">
+        <span className="p-2 bg-[#5690FF]/20 rounded-lg">
+          <ShieldCheck className="w-5 h-5 text-[#5690FF]" />
+        </span>
+        <span className="font-label text-[#5690FF] text-xs tracking-widest uppercase">Verified Protection</span>
+      </div>
+      <h1 className="text-4xl font-black mb-3 text-white leading-tight">Secure Your<br/>Earnings Now</h1>
+      <p className="text-[#94A3B8] text-lg">Our AI risk engine calculates your protection in under 60s.</p>
+    </div>
 
         {/* Progress Bar */}
         <div className="mb-12">
@@ -507,7 +563,8 @@ export const Onboarding: React.FC = () => {
             </Button>
           </div>
         )}
-      </div>
     </div>
+  </div>
+</div>
   );
 };
