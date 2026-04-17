@@ -8,7 +8,7 @@ import { RiskGauge } from '../components/charts/RiskGauge';
 import { registerWorker, createPolicy } from '../api/client';
 import { useStore } from '../store/useStore';
 import toast from 'react-hot-toast';
-import type { City, Platform, ShiftType, PlanType } from '../types';
+import type { City, Platform, ShiftType, PlanType, OnboardingResponse } from '../types';
 import { AppBackground } from '../components/AppBackground';
 const cities = ['Hyderabad', 'Bangalore', 'Mumbai', 'Delhi', 'Chennai', 'Pune'];
 const platforms = [
@@ -525,7 +525,7 @@ export const Onboarding: React.FC = () => {
                       </div>
                     </div>
                     <div className="grid md:grid-cols-3 gap-4">
-                      {workerResult.recommended_plans.map(plan => (
+                      {workerResult.recommended_plans.map((plan: OnboardingResponse['recommended_plans'][0]) => (
                         <div key={plan.plan_type} className={`border-2 rounded-xl p-4 transition-all ${plan.recommended ? 'border-[#5690FF] bg-[#5690FF]/5' : 'border-white/10 background-blur-xl'}`}>
                            {plan.recommended && <div className="text-[10px] text-[#5690FF] font-bold uppercase mb-1">Recommended</div>}
                           <Badge variant={plan.plan_type}>{plan.plan_type}</Badge>
