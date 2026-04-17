@@ -6,13 +6,6 @@
 [build.environment]
   NODE_VERSION = "20.11.0"
 
-# API Redirects
-# Replace 'https://your-backend-api.onrender.com' with your actual backend URL once deployed.
-[[redirects]]
-  from   = "/api/*"
-  to     = "https://axio-backend.onrender.com/api/:splat"
-  status = 200
-
 # Redirect all routes to index.html for SPA (React Router)
 [[redirects]]
   from   = "/*"
