@@ -26,7 +26,7 @@ import type {
 // ============================================================================
 
 const api: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "/api",
+  baseURL: import.meta.env.VITE_API_BASE_URL || "https://axio-backend.onrender.com",
   headers: {
     "Content-Type": "application/json",
   },
